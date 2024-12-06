@@ -1,0 +1,138 @@
+{
+  "dmr": [
+    {
+      "version": "1.21.1",
+      "dragonFields": [
+        {
+          "name": "ambient_sound",
+            "type": "sound_event",
+          "description": "The idle sound of the dragon",
+            "options": null
+        },
+        {
+          "name": "death_loot",
+          "type": "resource_location",
+          "description": "The loot table to use when the dragon dies",
+          "options": null
+        },
+        {
+          "name": "hatch_time",
+          "type": "int",
+          "description": "The time it takes for the dragon to hatch",
+          "options": null
+        },
+        {
+          "name": "growth_time",
+          "type": "int",
+          "description": "The time it takes for the dragon to grow",
+          "options": null
+        },
+        {
+          "name": "size_modifier",
+          "type": "float",
+          "description": "The size of the dragon",
+          "options": null
+        },
+        {
+          "name": "primary_color",
+          "type": "color",
+          "description": "The primary color of the dragons spawn egg",
+          "options": null
+        },
+        {
+            "name": "secondary_color",
+            "type": "color",
+            "description": "The secondary color of the dragons spawn egg",
+            "options": null
+            },
+        {
+          "name": "immunities",
+          "type": "immunities",
+          "description": "The immunities of the dragon",
+          "options": null,
+          "multiple": true
+        },
+        {
+          "name": "attributes",
+          "type": "map<resource_location, double>",
+          "description": "The attributes of the dragon",
+          "options": null,
+          "multiple": true
+        },
+        {
+          "name": "habitats",
+          "type": "habitats",
+          "description": "The habitats of the dragon",
+          "options": null,
+          "multiple": true
+
+        },
+        {
+          "name": "abilities",
+          "type": "abilities",
+          "description": "The abilities of the dragon",
+          "options": null,
+          "multiple": true
+
+        },
+        {
+          "name": "taming_items",
+          "type": "items",
+          "description": "The items used to tame the dragon",
+          "options": null,
+          "multiple": true
+
+        },
+        {
+          "name": "breeding_items",
+          "type": "items",
+          "description": "The items used to breed the dragon",
+          "multiple": true
+
+        },
+        {
+          "name": "hatching_particles",
+          "type": "particles",
+          "description": "The particles of the dragon when hatching",
+          "options": null
+
+        },
+        {
+          "name": "loot_tables",
+          "type": "loot_tables",
+          "description": "The loot tables of the dragon",
+          "options": null
+        },
+        {
+          "name": "accessories",
+          "type": "accessories",
+          "description": "The accessories of the dragon",
+          "options": null,
+          "multiple": true
+        }
+      ],
+        "armorFields": [
+            {
+            "name": "armor",
+            "type": "object",
+            "options": null
+            },
+            {
+            "name": "armor_material",
+            "type": "string",
+            "options": null
+            },
+            {
+            "name": "armor_color",
+            "type": "string",
+            "options": null
+            },
+            {
+            "name": "armor_texture",
+            "type": "string",
+            "options": null
+            }
+        ]
+    }
+  ]
+}

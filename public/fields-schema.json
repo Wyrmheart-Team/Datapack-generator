@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string"
+        },
+        "dragonFields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FieldProp"
+          }
+        },
+        "armorFields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FieldProp"
+          }
+        }
+      },
+      "required": ["version", "dragonFields", "armorFields"],
+      "additionalProperties": false
+    }
+  },
+  "definitions": {
+    "FieldProp": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "multiple": {
+          "type": "boolean",
+            "nullable": true
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "nullable": true
+        }
+      },
+      "required": ["name", "type"],
+      "additionalProperties": false
+    }
+  }
+}
