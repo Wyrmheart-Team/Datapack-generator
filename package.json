@@ -8,8 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "predeploy": "npm run build",
-    "deploy": "cd mod/1.21.1 && gradle runData && gradle build && cd ../.. && gh-pages -d dist"
+    "predeploy": "cd mod/1.21.1 && gradle runData && gradle build && cd ../.. && npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@emotion/react": "^11.13.5",

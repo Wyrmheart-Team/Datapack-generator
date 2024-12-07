@@ -77,7 +77,7 @@ const Navbar = ({ onSave }: { onSave: (arg: string) => void }) => {
 					Save as Zip
 				</SaveButton>
 				<NavMenu>
-					<NavLink to="/dmr">Dragon Mounts Remastered</NavLink>
+					<NavLink to="/">Dragon Mounts Remastered</NavLink>
 				</NavMenu>
 			</Nav>
 		</>

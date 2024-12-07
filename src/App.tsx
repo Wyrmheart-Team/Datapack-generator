@@ -2,7 +2,6 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import DMRPage from "./pages/dmr/DMR.tsx";
 import Navbar from "./NavBar.tsx";
 import { useEffect, useState } from "react";
-import { FormProvider } from "./Form.tsx";
 
 function App() {
 	const [versions, setVersions] = useState<VersionsProp>({});
@@ -37,7 +36,7 @@ function App() {
 				<Navbar onSave={(arg: string) => setMarkedForSave(arg)} />
 				<Routes>
 					<Route
-						path="/dmr"
+						path="/"
 						element={
 							<DMRPage
 								versions={versions["dmr"]}
