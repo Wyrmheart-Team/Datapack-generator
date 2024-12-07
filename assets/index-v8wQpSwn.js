@@ -283,7 +283,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 	position: absolute !important;
 	right: 20px !important;
 	top: 50px !important;
-`;function v3(){const[e,t]=$.useState({}),[r,i]=$.useState({}),[a,l]=$.useState("");return $.useEffect(()=>{fetch("versions.json").then(u=>{if(!u.ok)throw new Error(`Failed to fetch data: ${u.statusText}`);u.json().then(c=>{t(c)})}),fetch("fields.json").then(u=>{if(!u.ok)throw new Error(`Failed to fetch data: ${u.statusText}`);u.json().then(c=>{i(c)})})},[]),U.jsx(U.Fragment,{children:U.jsxs(Jw,{children:[U.jsx(m3,{onSave:u=>l(u)}),U.jsx(Iw,{children:U.jsx(ey,{path:"/dmr",element:U.jsx(u3,{versions:e.dmr,fields:r.dmr,markedForSave:a,setMarkedForSave:l})})})]})})}Wn.div`
+`;function v3(){const[e,t]=$.useState({}),[r,i]=$.useState({}),[a,l]=$.useState("");return $.useEffect(()=>{fetch("versions.json").then(u=>{if(!u.ok)throw new Error(`Failed to fetch data: ${u.statusText}`);u.json().then(c=>{t(c)})}),fetch("fields.json").then(u=>{if(!u.ok)throw new Error(`Failed to fetch data: ${u.statusText}`);u.json().then(c=>{i(c)})})},[]),U.jsx(U.Fragment,{children:U.jsxs(Jw,{children:[U.jsx(m3,{onSave:u=>l(u)}),U.jsx(Iw,{children:U.jsx(ey,{path:"/",element:U.jsx(u3,{versions:e.dmr,fields:r.dmr,markedForSave:a,setMarkedForSave:l})})})]})})}Wn.div`
 	display: flex;
 	justify-content: center;
 	align-items: center;
