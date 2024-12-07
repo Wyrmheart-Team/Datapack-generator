@@ -91,7 +91,7 @@
 
         },
         {
-          "name": "hatching_particles",
+          "name": "hatch_particles",
           "type": "particles",
           "description": "The particles of the dragon egg when hatching",
           "options": null
