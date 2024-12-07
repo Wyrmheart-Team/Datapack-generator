@@ -272,7 +272,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 	color: ${({theme:e})=>e.textColor}; // Text color matches theme
 	font-size: 24px;
 	margin: 0 0 25px;
-`,m3=({onSave:e})=>(Vo(),U.jsx(U.Fragment,{children:U.jsxs(d3,{children:[U.jsx(h3,{children:"Wyrmheart Team - Datapack Generator"}),U.jsxs(g3,{onClick:()=>e("zip"),children:[U.jsx(c3,{}),"Save as Zip"]}),U.jsx(f3,{children:U.jsx(p3,{to:"/dmr",children:"Dragon Mounts Remastered"})})]})})),g3=Wn(Rc)`
+`,m3=({onSave:e})=>(Vo(),U.jsx(U.Fragment,{children:U.jsxs(d3,{children:[U.jsx(h3,{children:"Wyrmheart Team - Datapack Generator"}),U.jsxs(g3,{onClick:()=>e("zip"),children:[U.jsx(c3,{}),"Save as Zip"]}),U.jsx(f3,{children:U.jsx(p3,{to:"/",children:"Dragon Mounts Remastered"})})]})})),g3=Wn(Rc)`
 	background-color: #007bff !important;
 	color: white !important;
 	border: none;
