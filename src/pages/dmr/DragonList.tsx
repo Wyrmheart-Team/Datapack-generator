@@ -1,8 +1,8 @@
 import styled from "styled-components";
-import { Button, Container, Title } from "../../App.tsx";
 import { Box } from "@mui/material";
 import { Dragon } from "./DMR.tsx";
 import { v4 as uuidv4 } from "uuid";
+import { Button, Container, Title } from "../../StyledProps.tsx";
 
 export function DragonList({
 	dragons,
@@ -36,7 +36,7 @@ export function DragonList({
 					type="button"
 					onClick={() => {
 						let newDragon: Dragon = {
-							name: `Dragon${dragons.length + 1}`,
+							name: "",
 							id: uuidv4(),
 						};
 						setDragons([...dragons, newDragon]);
@@ -49,15 +49,14 @@ export function DragonList({
 				{dragons &&
 					dragons.map((dragon) => (
 						<DragonButton
-							key={dragon.name}
+							key={dragon.id}
 							type="button"
-							// @ts-expect-error Stuff
-							$isSelected={(selectedDragon === dragon).toString()}
+							$isSelected={selectedDragon?.id === dragon.id}
 							onClick={() => {
 								setSelectedDragon(dragon);
 							}}
 						>
-							{dragon.name}
+							{dragon.name !== "" ? dragon.name : "Unnamed Dragon"}
 						</DragonButton>
 					))}
 			</Box>
@@ -65,20 +64,16 @@ export function DragonList({
 	);
 }
 
-export const DragonButton = styled(Button)`
-	background-color: ${(props) =>
-		(props as any["$isSelected"]) ? "#4caf50" : "#255826"};
+export const DragonButton = styled(Button)<{ $isSelected: boolean }>`
+	background-color: ${(props) => (props.$isSelected ? "#4caf50" : "#255826")};
 	color: ${(props) => ((props as any["$isSelected"]) ? "white" : "black")};
 
-	border-color: ${(props) =>
-		(props as any["$isSelected"]) ? "#4caf50" : "transparent"};
+	border-color: ${(props) => (props.$isSelected ? "#4caf50" : "transparent")};
 	border-radius: 0.5rem;
 	transition: all 0.3s;
-	font-weight: ${(props) =>
-		(props as any["$isSelected"]) ? "bold" : "normal"};
+	font-weight: ${(props) => (props.$isSelected ? "bold" : "normal")};
 
 	&:hover {
-		background-color: ${(props) =>
-			(props as any["$isSelected"]) ? "#45a049" : "#e0e0e0"};
+		background-color: ${(props) => (props.$isSelected ? "#45a049" : "#e0e0e0")};
 	}
 `;

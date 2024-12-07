@@ -5,13 +5,13 @@
       "dragonFields": [
         {
           "name": "ambient_sound",
-            "type": "sound_event",
-          "description": "The idle sound of the dragon",
+            "type": "sound_events",
+          "description": "Which sound to play when the dragon is idle",
             "options": null
         },
         {
           "name": "death_loot",
-          "type": "resource_location",
+          "type": "loot_tables",
           "description": "The loot table to use when the dragon dies",
           "options": null
         },
@@ -24,13 +24,13 @@
         {
           "name": "growth_time",
           "type": "int",
-          "description": "The time it takes for the dragon to grow",
+          "description": "The time it takes for the dragon to grow to full size",
           "options": null
         },
         {
           "name": "size_modifier",
           "type": "float",
-          "description": "The size of the dragon",
+          "description": "The size modifier of the dragon, a value of 1 is the default size. Affects the hitbox and model size",
           "options": null
         },
         {
@@ -47,22 +47,22 @@
             },
         {
           "name": "immunities",
-          "type": "immunities",
-          "description": "The immunities of the dragon",
+          "type": "damage_types",
+          "description": "Which damage types the dragon is immune to",
           "options": null,
           "multiple": true
         },
         {
           "name": "attributes",
-          "type": "map<resource_location, double>",
-          "description": "The attributes of the dragon",
+          "type": "attributes",
+          "description": "Attribute modifiers for the dragon",
           "options": null,
           "multiple": true
         },
         {
           "name": "habitats",
           "type": "habitats",
-          "description": "The habitats of the dragon",
+          "description": "Which habitats the dragon prefers, used for egg hatching",
           "options": null,
           "multiple": true
 
@@ -70,7 +70,7 @@
         {
           "name": "abilities",
           "type": "abilities",
-          "description": "The abilities of the dragon",
+          "description": "Which abilities the dragon has",
           "options": null,
           "multiple": true
 
@@ -93,20 +93,20 @@
         {
           "name": "hatching_particles",
           "type": "particles",
-          "description": "The particles of the dragon when hatching",
+          "description": "The particles of the dragon egg when hatching",
           "options": null
 
         },
         {
           "name": "loot_tables",
           "type": "loot_tables",
-          "description": "The loot tables of the dragon",
+          "description": "In which loot tables can the dragon egg be found",
           "options": null
         },
         {
           "name": "accessories",
           "type": "accessories",
-          "description": "The accessories of the dragon",
+          "description": "The model accessories of the dragon",
           "options": null,
           "multiple": true
         }

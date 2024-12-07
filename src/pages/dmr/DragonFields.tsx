@@ -1,4 +1,4 @@
-import { ColorField, FieldProp, InputField } from "../../App.tsx";
+import { FieldProp } from "../../App.tsx";
 import { JSX } from "react";
 import {
 	Autocomplete,
@@ -9,6 +9,12 @@ import {
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { matchIsValidColor } from "mui-color-input";
 import { Dragon } from "./DMR.tsx";
+import {
+	KeyValuePairInput,
+	ColorField,
+	StrictNumericTextField,
+} from "../../StyledProps.tsx";
+import { FormInput } from "../../Form.tsx";
 
 export function dragonFields(
 	field: FieldProp,
@@ -16,7 +22,12 @@ export function dragonFields(
 	dragons: Dragon[],
 	setDragons: (dragons: Dragon[]) => void,
 	setSelectedDragon: (dragon: Dragon | null) => void,
-	items: string[]
+	items: string[],
+	attributes: string[],
+	damageTypes: string[],
+	lootTables: string[],
+	particles: string[],
+	soundEvents: string[]
 ): JSX.Element {
 	const setFieldValue = (value: string) => {
 		if (!selectedDragon) return;
@@ -33,7 +44,6 @@ export function dragonFields(
 
 	const getFieldValue = () => {
 		if (!selectedDragon) return undefined;
-
 		return selectedDragon.fields?.[field.name] ?? undefined;
 	};
 
@@ -68,16 +78,36 @@ export function dragonFields(
 						horizontal: "left",
 					},
 				}}
+				slotProps={{
+					input: {
+						endAdornment: (
+							<>
+								<InputAdornment position="end">
+									<HelpButton />
+								</InputAdornment>
+							</>
+						),
+					},
+				}}
 				label={field.name}
 			/>
 		);
 	}
 
-	if (field.options || field.type === "items") {
+	//TODO Swap to a more custom solution of adding elements with properties, so that loot tables can be added with chance and other properties
+	// Maybe even just something like similar appearance to jsoneditoronline.org tree view
+	const fieldTypes: { [key: string]: string[] } = {
+		items,
+		damage_types: damageTypes,
+		loot_tables: lootTables,
+		particles,
+		sound_events: soundEvents,
+	};
+	if (field.options || Object.keys(fieldTypes).includes(field.type)) {
 		return (
 			<Autocomplete
 				freeSolo
-				options={field.type === "items" ? items : []}
+				options={field.options ?? fieldTypes[field.type]}
 				getOptionLabel={(option) => option}
 				limitTags={2}
 				fullWidth
@@ -85,16 +115,12 @@ export function dragonFields(
 				disableClearable
 				filterSelectedOptions
 				multiple={field.multiple}
-				sx={{
-					"& .MuiAutocomplete-tag": {
-						color: "white",
-					},
-				}}
 				renderInput={(params) => (
-					<InputField
+					<FormInput
 						autoComplete="off"
 						{...params}
 						label={field.name}
+						name={field.name}
 						InputProps={{
 							...params.InputProps,
 							endAdornment: (
@@ -108,30 +134,56 @@ export function dragonFields(
 						}}
 					/>
 				)}
-				onChange={(_event: any, value: any) => {
-					console.log(value);
-					setFieldValue(value);
+				onChange={(_event: any, value: any) => setFieldValue(value)}
+			/>
+		);
+	}
+
+	if (field.type === "attributes") {
+		return (
+			<KeyValuePairInput
+				onChange={(pairs) => {}}
+				label={field.name}
+				options={attributes}
+				InputProps={{
+					// @ts-expect-error Stuff
+					endAdornment: (
+						<>
+							<InputAdornment position="end">
+								<HelpButton />
+							</InputAdornment>
+						</>
+					),
 				}}
 			/>
 		);
 	}
 
-	// if (field.type === "int" || field.type === "float") {
-	// 	return (
-	// 		<NumberInput
-	// 			placeholder={field.name}
-	// 			value={getFieldValue()}
-	// 			onChange={(value) => {
-	// 				setFieldValue(value);
-	// 			}}
-	// 		/>
-	// 	);
-	// }
+	if (field.type === "int" || field.type === "float") {
+		return (
+			<StrictNumericTextField
+				label={field.name}
+				onChange={(value) => {
+					setFieldValue(value);
+				}}
+				InputProps={{
+					endAdornment: (
+						<>
+							<InputAdornment position="end">
+								<HelpButton />
+							</InputAdornment>
+						</>
+					),
+				}}
+			/>
+		);
+	}
 
 	return (
-		<InputField
-			type={field.type === "float" || field.type === "int" ? "number" : "text"}
+		<FormInput
+			type={"text"}
 			label={field.name}
+			name={field.name}
 			key={field.name}
 			value={getFieldValue()}
 			InputProps={{
@@ -140,11 +192,6 @@ export function dragonFields(
 						<HelpButton />
 					</InputAdornment>
 				),
-			}}
-			onChange={(event) => {
-				event.preventDefault();
-				let input = event.target.value;
-				setFieldValue(input);
 			}}
 		/>
 	);

@@ -1,5 +1,7 @@
 import styled from "styled-components";
-import { NavLink as Link } from "react-router-dom";
+import { NavLink as Link, useLocation } from "react-router-dom";
+import { Button, IconButton } from "@mui/material";
+import SaveIcon from "@mui/icons-material/Save";
 // Nav: The container for the entire navigation bar
 export const Nav = styled.nav`
 	background: #282c34;
@@ -55,11 +57,25 @@ export const Title = styled.h1`
 	margin: 0 0 25px;
 `;
 
-const Navbar = () => {
+const Navbar = ({ onSave }: { onSave: (arg: string) => void }) => {
+	const location = useLocation();
 	return (
 		<>
 			<Nav>
 				<Title>Wyrmheart Team - Datapack Generator</Title>
+				{/* <SaveButton */}
+				{/* 	onClick={() => onSave("mod")} */}
+				{/* 	sx={{ */}
+				{/* 		right: "200px !important", */}
+				{/* 	}} */}
+				{/* > */}
+				{/* 	<SaveIcon /> */}
+				{/* 	Save as Mod */}
+				{/* </SaveButton> */}
+				<SaveButton onClick={() => onSave("zip")}>
+					<SaveIcon />
+					Save as Zip
+				</SaveButton>
 				<NavMenu>
 					<NavLink to="/dmr">Dragon Mounts Remastered</NavLink>
 				</NavMenu>
@@ -67,5 +83,18 @@ const Navbar = () => {
 		</>
 	);
 };
+
+const SaveButton = styled(IconButton)`
+	background-color: #007bff !important;
+	color: white !important;
+	border: none;
+	border-radius: 15px !important;
+	padding: 0.5rem;
+	font-size: 16px;
+	cursor: pointer;
+	position: absolute !important;
+	right: 20px !important;
+	top: 50px !important;
+`;
 
 export default Navbar;

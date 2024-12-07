@@ -1,33 +1,20 @@
-import {
-	Button,
-	ColorField,
-	Container,
-	FieldProp,
-	FileInputWithTextField,
-	InputField,
-	Page,
-	Title,
-	TransparentAccordion,
-} from "../../App.tsx";
-import {
-	AccordionDetails,
-	AccordionSummary,
-	Autocomplete,
-	Box,
-	IconButton,
-	InputAdornment,
-	Tooltip,
-} from "@mui/material";
-import { JSX, useEffect, useState } from "react";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import { matchIsValidColor } from "mui-color-input";
+import { Page } from "../../App.tsx";
+import { Box } from "@mui/material";
+import { useEffect, useState } from "react";
+import JSZip from "jszip";
+
 import { DatapackInfo } from "./DatapackInfo.tsx";
 import { DragonList } from "./DragonList.tsx";
 import { dragonFields } from "./DragonFields.tsx";
+import {
+	Button,
+	Container,
+	FileInputWithTextField,
+} from "../../StyledProps.tsx";
+import { FormInput, SectionAccordion, useForm } from "../../Form.tsx";
 
 export type Dragon = {
-	name: string;
+	name?: string;
 	id: string;
 	texture?: File;
 	glowTexture?: File;
@@ -35,7 +22,7 @@ export type Dragon = {
 	model?: File;
 	animation?: File;
 	fields?: {
-		[key: string]: string;
+		[key: string]: any;
 	};
 };
 
@@ -45,7 +32,12 @@ export type Armor = {
 
 export type Mode = "dragon" | "armor";
 
-const DMRPage = ({ versions, fields }: Page) => {
+const DMRPage = ({
+	versions,
+	fields,
+	markedForSave,
+	setMarkedForSave,
+}: Page) => {
 	const [selectedVersion, setSelectedVersion] = useState<string>("");
 
 	const [datapackName, setDatapackName] = useState<string>("");
@@ -54,41 +46,208 @@ const DMRPage = ({ versions, fields }: Page) => {
 	const [mode, setMode] = useState<Mode>("dragon");
 
 	const [items, setItems] = useState<string[]>([]);
+	const [attributes, setAttributes] = useState<string[]>([]);
+	const [damageTypes, setDamageTypes] = useState<string[]>([]);
+	const [lootTables, setLootTables] = useState<string[]>([]);
+	const [particles, setParticles] = useState<string[]>([]);
+	const [soundEvents, setSoundEvents] = useState<string[]>([]);
+
+	const form = useForm();
 
 	useEffect(() => {
-		const fetchItems = async () => {
+		if (markedForSave) {
+			setMarkedForSave("");
+
+			const isValid = form.validate();
+			console.log("isValid", isValid);
+
+			if (!isValid) {
+				alert("Please fill out all required fields before saving.");
+				return;
+			}
+
+			if (markedForSave === "zip") {
+				const zip = new JSZip();
+				const resourceZip = new JSZip();
+				const dataZip = new JSZip();
+
+				const lang: { [key: string]: string } = {};
+
+				// Add dragons to zip
+				dragons.forEach((dragon) => {
+					const dragonId = dragon.name!.toLowerCase().replace(/ /g, "_");
+					const name = dragon.name!;
+
+					if (dragon.model) {
+						resourceZip.file(
+							`assets/${datapackId}/geo/${dragonId}.json`,
+							dragon.model
+						);
+					}
+
+					if (dragon.animation) {
+						resourceZip.file(
+							`assets/${datapackId}/animations/${dragonId}.animation.json`,
+							dragon.animation
+						);
+					}
+
+					resourceZip.file(
+						`assets/${datapackId}/textures/entity/dragon/${dragonId}/body.png`,
+						dragon.texture
+					);
+
+					if (dragon.saddleTexture) {
+						resourceZip.file(
+							`assets/${datapackId}/textures/entity/dragon/${dragonId}/saddle.png`,
+							dragon.saddleTexture
+						);
+					}
+
+					if (dragon.glowTexture) {
+						resourceZip.file(
+							`assets/${datapackId}/textures/entity/dragon/${dragonId}/glow.png`,
+							dragon.glowTexture
+						);
+					}
+
+					lang[`${datapackId}.dragon_breed.${dragonId}`] = `${name} Dragon`;
+					lang[`item.${datapackId}.dragon_spawn_egg.${dragonId}`] =
+						`${name} Dragon Spawn Egg`;
+					lang[`block.${datapackId}.dragon_egg.${dragonId}`] =
+						`${name} Dragon Egg`;
+
+					const attributes = dragon.fields?.attributes?.reduce(
+						(acc: any, item: string) => {
+							const [key, value] = item.split("=");
+							acc[key] = value;
+							return acc;
+						},
+						{}
+					);
+
+					dataZip.file(
+						`data/${datapackId}/dmr/breeds/${dragonId}.json`,
+						JSON.stringify({
+							attributes:
+								attributes && attributes.length > 0
+									? {
+											...attributes,
+										}
+									: undefined,
+							//TODO Add chance to loot tables
+							loot_tables: dragon.fields?.loot_tables.map((item: string) => {
+								return { table: item, min: 1, max: 1, chance: 0.1 };
+							}),
+							hatch_particles: dragon.fields?.hatch_particles
+								? { type: dragon.fields?.hatch_particles }
+								: undefined,
+							primary_color: hexToInt(dragon.fields?.primary_color),
+							secondary_color: hexToInt(dragon.fields?.secondary_color),
+							...dragon.fields,
+						})
+					);
+				});
+
+				resourceZip.file(
+					`assets/${datapackId}/lang/en_us.json`,
+					JSON.stringify(lang, null, 2)
+				);
+
+				resourceZip.file(
+					`pack.mcmeta`,
+					JSON.stringify(
+						{
+							pack: {
+								pack_format: "22",
+								description: `Textures for ${datapackName}`,
+							},
+						},
+						null,
+						2
+					)
+				);
+
+				const generatePack = async () => {
+					zip.file(
+						`${datapackId} - Resource Pack.zip`,
+						await resourceZip.generateAsync({ type: "blob" })
+					);
+					zip.file(
+						`${datapackId} - Data Pack.zip`,
+						await dataZip.generateAsync({ type: "blob" })
+					);
+
+					const zipBlob = await zip.generateAsync({ type: "blob" });
+
+					// Trigger download
+					const url = URL.createObjectURL(zipBlob);
+					const link = document.createElement("a");
+					link.href = url;
+					link.download = `${datapackName} - Bundled.zip`;
+					link.click();
+
+					// Clean up
+					URL.revokeObjectURL(url);
+				};
+
+				generatePack();
+			}
+		}
+	}, [markedForSave]);
+
+	const hexToInt = (hex?: string) => {
+		if (!hex) return undefined;
+
+		const sanitizedHex = hex.replace("#", "");
+		return parseInt(sanitizedHex, 16);
+	};
+
+	useEffect(() => {
+		const fetchFiles = async () => {
 			if (!selectedVersion) return;
 
 			try {
-				const response = await fetch(`${selectedVersion}/en_us.json`);
-				if (!response.ok) {
-					throw new Error("Failed to fetch local lang file");
-				}
-
-				const data = await response.json();
-
-				const items = Object.entries(data)
-					.filter(
-						([key]) =>
-							key.startsWith("item.minecraft.") &&
-							!key.includes("spawn_egg") &&
-							!key.includes(".desc") &&
-							!key.includes("firework") &&
-							!key.includes("potion") &&
-							!key.includes("tipped_arrow")
-					)
-					.map(([key]) => key.replace("item.minecraft.", "minecraft:"));
-
-				const uniqueItems = Array.from(
-					new Map(items.map((item) => [item, item])).values()
+				setItems(
+					(await (
+						await fetch(`generated/${selectedVersion}/items.json`)
+					).json()) as string[]
 				);
 
-				setItems(uniqueItems);
+				setAttributes(
+					(await (
+						await fetch(`generated/${selectedVersion}/attributes.json`)
+					).json()) as string[]
+				);
+
+				setDamageTypes(
+					(await (
+						await fetch(`generated/${selectedVersion}/damage_types.json`)
+					).json()) as string[]
+				);
+
+				setLootTables(
+					(await (
+						await fetch(`generated/${selectedVersion}/loot_tables.json`)
+					).json()) as string[]
+				);
+
+				setParticles(
+					(await (
+						await fetch(`generated/${selectedVersion}/particles.json`)
+					).json()) as string[]
+				);
+
+				setSoundEvents(
+					(await (
+						await fetch(`generated/${selectedVersion}/sound_events.json`)
+					).json()) as string[]
+				);
 			} catch (err: any) {
 				console.error(err.message);
 			}
 		};
-		fetchItems();
+		fetchFiles();
 	}, [selectedVersion]);
 
 	const [dragons, setDragons] = useState<Dragon[]>([]);
@@ -143,289 +302,212 @@ const DMRPage = ({ versions, fields }: Page) => {
 						<Button
 							type="button"
 							onClick={() => {
+								const isConfirmed = window.confirm(
+									"Are you sure you wish to delete this dragon?"
+								);
+								if (!isConfirmed) return;
+
 								setDragons(dragons.filter((d) => d.id !== selectedDragon.id));
 								setSelectedDragon(null);
 							}}
 							style={{
 								backgroundColor: "indianred",
 								color: "white",
-								border: "none",
 								borderRadius: "0.5rem",
 								padding: "0.5rem",
+								marginBottom: "20px",
 								fontSize: "16px",
 								cursor: "pointer",
+								border: "1px solid #282c34",
 							}}
 						>
 							Delete
 						</Button>
 
-						<TransparentAccordion
-							defaultExpanded
-							sx={{
-								backgroundColor: "#282c34",
-								borderRadius: "15px",
-								marginBottom: "20px",
-							}}
-						>
-							<AccordionSummary
-								expandIcon={<ExpandMoreIcon style={{ color: "white" }} />}
+						<SectionAccordion defaultExpanded title="Info">
+							<Box
+								component="form"
+								sx={{
+									display: "flex",
+									flexDirection: "column",
+									gap: 6,
+									paddingBottom: "40px",
+								}}
 							>
-								<Title style={{ marginBottom: "0" }}>Info</Title>
-							</AccordionSummary>
-							<AccordionDetails>
-								<Box
-									component="form"
-									sx={{
-										display: "flex",
-										flexDirection: "column",
-										gap: 6,
-										paddingBottom: "40px",
+								<FormInput
+									type="text"
+									label="Name"
+									name="name"
+									value={selectedDragon.name}
+									required={true}
+									onChange={(event) => {
+										let dragon = dragons.find(
+											(d) => d.id === selectedDragon.id
+										)!;
+										dragon!.name = event.target.value;
+
+										setDragons(
+											dragons.map((d) =>
+												d.id === selectedDragon.id ? dragon : d
+											)
+										);
+										setSelectedDragon(dragon);
 									}}
-								>
-									<InputField
-										type="text"
-										label="Name"
-										value={selectedDragon.name}
-										required={true}
-										FormHelperTextProps={{
-											style: {
-												color: "indianred",
-												fontStyle: "italic",
-											},
-										}}
-										helperText={" * This field is required"}
-										onChange={(event) => {
-											let dragon = dragons.find(
-												(d) => d.id === selectedDragon.id
-											)!;
-											dragon!.name = event.target.value;
+								/>
+							</Box>
+						</SectionAccordion>
 
-											setDragons(
-												dragons.map((d) =>
-													d.id === selectedDragon.id ? dragon : d
-												)
-											);
-											setSelectedDragon(dragon);
-										}}
-									/>
-								</Box>
-							</AccordionDetails>
-						</TransparentAccordion>
-
-						<TransparentAccordion
-							sx={{
-								backgroundColor: "#282c34",
-								borderRadius: "15px",
-								marginBottom: "20px",
-							}}
-							defaultExpanded
-						>
-							<AccordionSummary
-								expandIcon={<ExpandMoreIcon style={{ color: "white" }} />}
+						<SectionAccordion title="Model/Animations">
+							<Box
+								component="form"
+								sx={{
+									display: "flex",
+									flexDirection: "column",
+									gap: 6,
+									padding: "10px",
+									overflowY: "scroll",
+									paddingBottom: "40px",
+								}}
 							>
-								<Title style={{ marginBottom: "0" }}>Model/Animations</Title>
-							</AccordionSummary>
-							<AccordionDetails>
-								<Box
-									component="form"
-									sx={{
-										display: "flex",
-										flexDirection: "column",
-										gap: 6,
-										padding: "10px",
-										overflowY: "scroll",
-										paddingBottom: "40px",
+								<FileInputWithTextField
+									label="Model"
+									fileTypes=".json"
+									onChange={(file) => {
+										let dragon = dragons.find(
+											(d) => d.id === selectedDragon.id
+										)!;
+										dragon.model = file;
+
+										setDragons(
+											dragons.map((d) =>
+												d.id === selectedDragon.id ? dragon : d
+											)
+										);
+										setSelectedDragon(dragon);
 									}}
-								>
-									<FileInputWithTextField
-										label="Model"
-										onChange={(file) => {
-											let dragon = dragons.find(
-												(d) => d.id === selectedDragon.id
-											)!;
-											dragon.model = file;
+								/>
+								<FileInputWithTextField
+									label="Animation"
+									fileTypes=".json"
+									onChange={(file) => {
+										let dragon = dragons.find(
+											(d) => d.id === selectedDragon.id
+										)!;
+										dragon.animation = file;
 
-											setDragons(
-												dragons.map((d) =>
-													d.id === selectedDragon.id ? dragon : d
-												)
-											);
-											setSelectedDragon(dragon);
-										}}
-									/>
-									<FileInputWithTextField
-										label="Animation"
-										onChange={(file) => {
-											let dragon = dragons.find(
-												(d) => d.id === selectedDragon.id
-											)!;
-											dragon.animation = file;
+										setDragons(
+											dragons.map((d) =>
+												d.id === selectedDragon.id ? dragon : d
+											)
+										);
+										setSelectedDragon(dragon);
+									}}
+								/>
+							</Box>
+						</SectionAccordion>
 
-											setDragons(
-												dragons.map((d) =>
-													d.id === selectedDragon.id ? dragon : d
-												)
-											);
-											setSelectedDragon(dragon);
-										}}
-									/>
-								</Box>
-							</AccordionDetails>
-						</TransparentAccordion>
-
-						<TransparentAccordion
-							sx={{
-								backgroundColor: "#282c34",
-								borderRadius: "15px",
-								marginBottom: "20px",
-							}}
-							defaultExpanded
-						>
-							<AccordionSummary
-								expandIcon={<ExpandMoreIcon style={{ color: "white" }} />}
+						<SectionAccordion defaultExpanded title="Textures">
+							<Box
+								component="form"
+								sx={{
+									display: "flex",
+									flexDirection: "column",
+									gap: 6,
+									padding: "10px",
+									overflowY: "scroll",
+									paddingBottom: "40px",
+								}}
 							>
-								<Title style={{ marginBottom: "0" }}>Textures</Title>
-							</AccordionSummary>
-							<AccordionDetails>
-								<Box
-									component="form"
-									sx={{
-										display: "flex",
-										flexDirection: "column",
-										gap: 6,
-										padding: "10px",
-										overflowY: "scroll",
-										paddingBottom: "40px",
+								<FileInputWithTextField
+									label="Skin texture"
+									fileTypes=".png,.jpg,.jpeg"
+									required={true}
+									onChange={(file) => {
+										let dragon = dragons.find(
+											(d) => d.id === selectedDragon.id
+										)!;
+										dragon.texture = file;
+
+										setDragons(
+											dragons.map((d) =>
+												d.id === selectedDragon.id ? dragon : d
+											)
+										);
+										setSelectedDragon(dragon);
 									}}
-								>
-									<FileInputWithTextField
-										label="Skin texture"
-										required={true}
-										onChange={(file) => {
-											let dragon = dragons.find(
-												(d) => d.id === selectedDragon.id
-											)!;
-											dragon.texture = file;
+								/>
+								<FileInputWithTextField
+									label="Saddle texture"
+									fileTypes=".png,.jpg,.jpeg"
+									onChange={(file) => {
+										let dragon = dragons.find(
+											(d) => d.id === selectedDragon.id
+										)!;
+										dragon.saddleTexture = file;
 
-											setDragons(
-												dragons.map((d) =>
-													d.id === selectedDragon.id ? dragon : d
-												)
-											);
-											setSelectedDragon(dragon);
-										}}
-									/>
-									<FileInputWithTextField
-										label="Saddle texture"
-										onChange={(file) => {
-											let dragon = dragons.find(
-												(d) => d.id === selectedDragon.id
-											)!;
-											dragon.saddleTexture = file;
+										setDragons(
+											dragons.map((d) =>
+												d.id === selectedDragon.id ? dragon : d
+											)
+										);
+										setSelectedDragon(dragon);
+									}}
+								/>
+								<FileInputWithTextField
+									label="Glow texture"
+									fileTypes=".png,.jpg,.jpeg"
+									onChange={(file) => {
+										let dragon = dragons.find(
+											(d) => d.id === selectedDragon.id
+										)!;
+										dragon.glowTexture = file;
 
-											setDragons(
-												dragons.map((d) =>
-													d.id === selectedDragon.id ? dragon : d
-												)
-											);
-											setSelectedDragon(dragon);
-										}}
-									/>
-									<FileInputWithTextField
-										label="Glow texture"
-										onChange={(file) => {
-											let dragon = dragons.find(
-												(d) => d.id === selectedDragon.id
-											)!;
-											dragon.glowTexture = file;
+										setDragons(
+											dragons.map((d) =>
+												d.id === selectedDragon.id ? dragon : d
+											)
+										);
+										setSelectedDragon(dragon);
+									}}
+								/>
+							</Box>
+						</SectionAccordion>
 
-											setDragons(
-												dragons.map((d) =>
-													d.id === selectedDragon.id ? dragon : d
-												)
-											);
-											setSelectedDragon(dragon);
-										}}
-									/>
-								</Box>
-							</AccordionDetails>
-						</TransparentAccordion>
-
-						<TransparentAccordion
-							sx={{
-								backgroundColor: "#282c34",
-								borderRadius: "15px",
-								marginBottom: "20px",
-							}}
-							defaultExpanded
-						>
-							<AccordionSummary
-								expandIcon={<ExpandMoreIcon style={{ color: "white" }} />}
+						<SectionAccordion title="Fields/Values">
+							<Box
+								component="form"
+								sx={{
+									display: "flex",
+									flexDirection: "column",
+									gap: 6,
+									padding: "10px",
+									overflowY: "scroll",
+									paddingBottom: "40px",
+								}}
 							>
-								<Title style={{ marginBottom: "0" }}>Fields</Title>
-							</AccordionSummary>
-							<AccordionDetails>
-								<Box
-									component="form"
-									sx={{
-										display: "flex",
-										flexDirection: "column",
-										gap: 6,
-										padding: "10px",
-										overflowY: "scroll",
-										paddingBottom: "40px",
-									}}
-								>
-									{selectedVersion &&
-										fields
-											.filter((s) => s.version === selectedVersion)
-											.flatMap((s) => s.dragonFields)
-											.map((field) =>
-												dragonFields(
-													field,
-													selectedDragon,
-													dragons,
-													setDragons,
-													setSelectedDragon,
-													items
-												)
-											)}
-								</Box>
-							</AccordionDetails>
-						</TransparentAccordion>
+								{selectedVersion &&
+									fields
+										.filter((s) => s.version === selectedVersion)
+										.flatMap((s) => s.dragonFields)
+										.map((field) =>
+											dragonFields(
+												field,
+												selectedDragon,
+												dragons,
+												setDragons,
+												setSelectedDragon,
+												items,
+												attributes,
+												damageTypes,
+												lootTables,
+												particles,
+												soundEvents
+											)
+										)}
+							</Box>
+						</SectionAccordion>
 					</Container>
 				)}
-
-				{/* {mode === "armor" && selectedArmor && ( */}
-				{/* 	<Container */}
-				{/* 		key="armorFields" */}
-				{/* 		style={{ flex: "1 1 400px", maxHeight: "75vh", height: "75vh" }} */}
-				{/* 	> */}
-				{/* 		<Title>Fields</Title> */}
-				{/* 		<Box */}
-				{/* 			component="form" */}
-				{/* 			sx={{ */}
-				{/* 				display: "flex", */}
-				{/* 				flexDirection: "column", */}
-				{/* 				gap: 6, */}
-				{/* 				padding: "10px", */}
-				{/* 			}} */}
-				{/* 		> */}
-				{/* 			{selectedVersion && */}
-				{/* 				fields */}
-				{/* 					.filter((s) => s.version === selectedVersion) */}
-				{/* 					.flatMap((s) => s.dragonFields) */}
-				{/* 					.map((field) => dragonFields( */}
-				{/* 						field, */}
-				{/* 						selectedDragon, */}
-				{/* 						dragons, */}
-				{/* 						setDragons, */}
-				{/* 						setSelectedDragon, */}
-				{/* 						items */}
-				{/* 					))} */}
-				{/* 		</Box> */}
-				{/* 	</Container> */}
-				{/* )} */}
 			</Box>
 		</>
 	);

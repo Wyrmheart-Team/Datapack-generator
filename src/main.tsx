@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
 import styled from "styled-components";
+import { FormProvider } from "./Form.tsx";
 
 const LoadingElement = styled.div`
 	display: flex;
@@ -14,8 +15,8 @@ const LoadingElement = styled.div`
 
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
-		<Suspense fallback={<LoadingElement>Loading...</LoadingElement>}>
+		<FormProvider>
 			<App />
-		</Suspense>
+		</FormProvider>
 	</StrictMode>
 );

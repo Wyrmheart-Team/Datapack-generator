@@ -82,9 +82,22 @@ button:focus-visible {
 }
 
 .MuiPaper-root {
-  background: #282c34 !important;
+  background: #343944 !important;
 }
 
 .MuiMenuItem-root {
   color: #fff !important;
+}
+
+.MuiAutocomplete-tag {
+  color: #fff !important;
+}
+
+.MuiInputBase-input {
+  color: white;
+}
+
+.MuiInputLabel-root {
+  color: darkgray;
+  font-style: italic;
 }

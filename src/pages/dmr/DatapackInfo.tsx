@@ -1,6 +1,7 @@
 import { Box, MenuItem } from "@mui/material";
-import { Container, InputField, SelectField, Title } from "../../App.tsx";
 import { Mode } from "./DMR.tsx";
+import { Container, SelectField, Title } from "../../StyledProps.tsx";
+import { FormInput } from "../../Form.tsx";
 
 type DatapackInfoProps = {
 	versions: string[];
@@ -46,37 +47,25 @@ export function DatapackInfo({
 					sx={{
 						display: "flex",
 						flexDirection: "column",
-						gap: 8,
+						gap: 6,
 						width: "100%",
 					}}
 				>
-					<InputField
+					<FormInput
 						type="text"
 						label="Datapack name"
+						name="datapackName"
 						required={true}
 						value={dataPackName}
 						onChange={(event) => setDatapackName(event.target.value)}
-						helperText={" * This field is required"}
-						FormHelperTextProps={{
-							style: {
-								color: "indianred",
-								fontStyle: "italic",
-							},
-						}}
 					/>
-					<InputField
+					<FormInput
 						type="text"
 						label="Datapack id"
+						name="datapackId"
 						required={true}
 						value={datapackId}
 						onChange={(event) => setDatapackId(event.target.value)}
-						helperText={" * This field is required"}
-						FormHelperTextProps={{
-							style: {
-								color: "indianred",
-								fontStyle: "italic",
-							},
-						}}
 					/>
 					{versions && (
 						<>
@@ -118,7 +107,7 @@ export function DatapackInfo({
 						}}
 					>
 						<MenuItem value="dragon">Dragons</MenuItem>
-						<MenuItem value="armor">Armors</MenuItem>
+						{/* <MenuItem value="armor">Armors</MenuItem> */}
 					</SelectField>
 				</Box>
 			</Container>
