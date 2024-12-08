@@ -101,7 +101,8 @@
           "name": "loot_tables",
           "type": "loot_tables",
           "description": "In which loot tables can the dragon egg be found",
-          "options": null
+          "options": null,
+            "multiple": true
         },
         {
           "name": "accessories",
