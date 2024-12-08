@@ -1,7 +1,7 @@
 import { Box, MenuItem } from "@mui/material";
-import { Container, SelectField, Title } from "../../StyledProps.tsx";
-import { FormInput } from "../../Form.tsx";
-import { Mode } from "../../Types.ts";
+import { Container, SelectField, Title } from "../app/StyledProps.tsx";
+import { FormInput } from "../app/Form.tsx";
+import { Mode } from "../types/DMRTypes";
 
 type DatapackInfoProps = {
 	versions: string[];
@@ -18,7 +18,7 @@ type DatapackInfoProps = {
 	setMode: (mode: Mode) => void;
 };
 
-export function DatapackInfo({
+export function DatapackInfoComponent({
 	versions,
 	selectedVersion,
 	setSelectedVersion,
@@ -65,6 +65,7 @@ export function DatapackInfo({
 						name="datapackId"
 						required={true}
 						value={datapackId}
+						inputProps={{ maxLength: 16 }}
 						onChange={(event) =>
 							setDatapackId(event.target.value.toLowerCase().replace(/ /g, "_"))
 						}
@@ -81,7 +82,9 @@ export function DatapackInfo({
 								}}
 							>
 								{versions.reverse().map((version: string) => (
-									<MenuItem value={version}>{version}</MenuItem>
+									<MenuItem value={version} key={version}>
+										{version}
+									</MenuItem>
 								))}
 							</SelectField>
 						</>
@@ -101,15 +104,17 @@ export function DatapackInfo({
 				>
 					<SelectField
 						value={mode}
-						onChange={(event) =>
-							setMode(event.target.value as "dragon" | "armor")
-						}
+						onChange={(event) => setMode(event.target.value as Mode)}
 						style={{
 							color: "white",
 						}}
 					>
-						<MenuItem value="dragon">Dragons</MenuItem>
-						{/* <MenuItem value="armor">Armors</MenuItem> */}
+						<MenuItem value="dragon" key="dragons">
+							Dragons
+						</MenuItem>
+						<MenuItem value="armor" key="armors">
+							Armors
+						</MenuItem>
 					</SelectField>
 				</Box>
 			</Container>

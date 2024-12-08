@@ -5,135 +5,131 @@
       "dragonFields": [
         {
           "name": "ambient_sound",
-            "type": "sound_events",
-          "description": "Which sound to play when the dragon is idle",
-            "options": null
+          "type": "sound_events",
+          "description": "Which sound to play when the dragon is idle"
         },
         {
           "name": "death_loot",
           "type": "loot_tables",
-          "description": "The loot table to use when the dragon dies",
-          "options": null
+          "description": "The loot table to use when the dragon dies"
         },
         {
           "name": "hatch_time",
           "type": "int",
-          "description": "The time it takes for the dragon to hatch",
-          "options": null
+          "description": "The time it takes for the dragon to hatch"
         },
         {
           "name": "growth_time",
           "type": "int",
-          "description": "The time it takes for the dragon to grow to full size",
-          "options": null
+          "description": "The time it takes for the dragon to grow to full size"
         },
         {
           "name": "size_modifier",
           "type": "float",
-          "description": "The size modifier of the dragon, a value of 1 is the default size. Affects the hitbox and model size",
-          "options": null
+          "description": "The size modifier of the dragon, a value of 1 is the default size. Affects the hitbox and model size"
         },
         {
           "name": "primary_color",
           "type": "color",
-          "description": "The primary color of the dragons spawn egg",
-          "options": null
+          "description": "The primary color of the dragons spawn egg"
         },
         {
-            "name": "secondary_color",
-            "type": "color",
-            "description": "The secondary color of the dragons spawn egg",
-            "options": null
-            },
+          "name": "secondary_color",
+          "type": "color",
+          "description": "The secondary color of the dragons spawn egg"
+        },
         {
           "name": "immunities",
           "type": "damage_types",
           "description": "Which damage types the dragon is immune to",
-          "options": null,
           "multiple": true
         },
         {
           "name": "attributes",
           "type": "attributes",
           "description": "Attribute modifiers for the dragon",
-          "options": null,
           "multiple": true
         },
         {
           "name": "habitats",
           "type": "habitats",
           "description": "Which habitats the dragon prefers, used for egg hatching",
-          "options": null,
           "multiple": true
-
         },
         {
           "name": "abilities",
           "type": "abilities",
           "description": "Which abilities the dragon has",
-          "options": null,
-          "multiple": true
-
+          "multiple": true,
+          "options": [
+            "aquatic_grace",
+            "camouflage",
+            "crystal_harmony",
+            "echo_sense",
+            "ember_aura",
+            "ender_cloak",
+            "etheral_harmony",
+            "fire_proof",
+            "floral_trail",
+            "frost_aura",
+            "frost_walker",
+            "gem_guard",
+            "hot_feet",
+            "infernal_pact",
+            "nature_blessing",
+            "quick_flight",
+            "swift_swim",
+            "void_walker"
+          ]
         },
         {
           "name": "taming_items",
           "type": "items",
           "description": "The items used to tame the dragon",
-          "options": null,
           "multiple": true
-
         },
         {
           "name": "breeding_items",
           "type": "items",
           "description": "The items used to breed the dragon",
           "multiple": true
-
         },
         {
           "name": "hatch_particles",
           "type": "particles",
-          "description": "The particles of the dragon egg when hatching",
-          "options": null
-
+          "description": "The particles of the dragon egg when hatching"
         },
         {
           "name": "loot_tables",
           "type": "loot_tables",
           "description": "In which loot tables can the dragon egg be found",
-          "options": null,
-            "multiple": true
+          "multiple": true
         },
         {
           "name": "accessories",
           "type": "accessories",
           "description": "The model accessories of the dragon",
-          "options": null,
           "multiple": true
         }
       ],
-        "armorFields": [
-            {
-            "name": "armor",
-            "type": "object",
-            "options": null
-            },
-            {
-            "name": "armor_material",
-            "type": "string",
-            "options": null
-            },
-            {
-            "name": "armor_color",
-            "type": "string",
-            "options": null
-            },
-            {
-            "name": "armor_texture",
-            "type": "string",
-            "options": null
-            }
-        ]
+      "armorFields": [
+        {
+          "name": "armor",
+          "type": "object"
+        },
+        {
+          "name": "armor_material",
+          "type": "string"
+        },
+        {
+          "name": "armor_color",
+          "type": "string"
+        },
+        {
+          "name": "armor_texture",
+          "type": "string"
+        }
+      ]
     }
   ]
 }

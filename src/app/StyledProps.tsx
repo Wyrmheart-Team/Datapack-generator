@@ -213,6 +213,7 @@ export const KeyValuePairInput: React.FC<{
 				freeSolo
 				options={options ?? []}
 				value={pairs.map((pair) => `${pair.key}=${pair.value}`)}
+				limitTags={3}
 				onChange={(event, newValues, reason) => {
 					console.log(newValues, reason);
 					if (reason === "selectOption") {

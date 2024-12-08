@@ -1,12 +1,14 @@
 package dmr_datapack;
 
 import com.google.gson.JsonArray;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
+import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.EventBusSubscriber.Bus;
@@ -16,6 +18,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -38,7 +41,7 @@ public class InfoFetcher {
 					var path = output.getOutputFolder();
 					
 					var itemJson = new JsonArray();
-					BuiltInRegistries.ITEM.stream().forEach(item -> {
+					BuiltInRegistries.ITEM.stream().sorted(Comparator.comparing(Item::getDescriptionId)).forEach(item -> {
 						var id = item.getDescriptionId();
 						if(id.startsWith("item.")){
 							itemJson.add(BuiltInRegistries.ITEM.getKey(item).toString());
@@ -48,7 +51,7 @@ public class InfoFetcher {
 					
 					var lootTablesJson = new JsonArray();
 					try {
-						lookupProvider.get().lookup(Registries.LOOT_TABLE).ifPresent((lookup) -> lookup.listElements().forEach((lootTable) -> lootTablesJson.add(lootTable.getRegisteredName())));
+						lookupProvider.get().lookup(Registries.LOOT_TABLE).ifPresent((lookup) -> lookup.listElements().sorted(Comparator.comparing(Holder::getRegisteredName)).forEach((lootTable) -> lootTablesJson.add(lootTable.getRegisteredName())));
 					} catch (InterruptedException | ExecutionException e) {
 						throw new RuntimeException(e);
 					}
@@ -57,7 +60,7 @@ public class InfoFetcher {
 					
 					var soundEventsJson = new JsonArray();
 					try {
-						lookupProvider.get().lookup(Registries.SOUND_EVENT).ifPresent((lookup) -> lookup.listElements().forEach((soundEvent) -> soundEventsJson.add(soundEvent.getRegisteredName())));
+						lookupProvider.get().lookup(Registries.SOUND_EVENT).ifPresent((lookup) -> lookup.listElements().sorted(Comparator.comparing(Holder::getRegisteredName)).forEach((soundEvent) -> soundEventsJson.add(soundEvent.getRegisteredName())));
 					} catch (InterruptedException | ExecutionException e) {
 						throw new RuntimeException(e);
 					}
@@ -67,7 +70,7 @@ public class InfoFetcher {
 					
 					var attributesJson = new JsonArray();
 					try {
-						lookupProvider.get().lookup(Registries.ATTRIBUTE).ifPresent((lookup) -> lookup.listElements().forEach((attribute) -> attributesJson.add(attribute.getRegisteredName())));
+						lookupProvider.get().lookup(Registries.ATTRIBUTE).ifPresent((lookup) -> lookup.listElements().sorted(Comparator.comparing(Holder::getRegisteredName)).forEach((attribute) -> attributesJson.add(attribute.getRegisteredName())));
 					} catch (InterruptedException | ExecutionException e) {
 						throw new RuntimeException(e);
 					}
@@ -77,7 +80,7 @@ public class InfoFetcher {
 					
 					var particlesJson = new JsonArray();
 					try {
-						lookupProvider.get().lookup(Registries.PARTICLE_TYPE).ifPresent((lookup) -> lookup.listElements().forEach((particle) -> particlesJson.add(particle.getRegisteredName())));
+						lookupProvider.get().lookup(Registries.PARTICLE_TYPE).ifPresent((lookup) -> lookup.listElements().sorted(Comparator.comparing(Holder::getRegisteredName)).forEach((particle) -> particlesJson.add(particle.getRegisteredName())));
 					} catch (InterruptedException | ExecutionException e) {
 						throw new RuntimeException(e);
 					}
@@ -87,7 +90,7 @@ public class InfoFetcher {
 					var damageTypesJson = new JsonArray();
 					
 					try {
-						lookupProvider.get().lookup(Registries.DAMAGE_TYPE).ifPresent((lookup) -> lookup.listElements().forEach((damageType) -> damageTypesJson.add(damageType.getRegisteredName())));
+						lookupProvider.get().lookup(Registries.DAMAGE_TYPE).ifPresent((lookup) -> lookup.listElements().sorted(Comparator.comparing(Holder::getRegisteredName)).forEach((damageType) -> damageTypesJson.add(damageType.getRegisteredName())));
 					} catch (InterruptedException | ExecutionException e) {
 						throw new RuntimeException(e);
 					}

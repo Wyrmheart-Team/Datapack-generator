@@ -1,8 +1,9 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import DMRPage from "./pages/dmr/DMR.tsx";
-import Navbar from "./NavBar.tsx";
+import DMRPage from "./pages/DMRPage.tsx";
+import Navbar from "./app/NavBar.tsx";
 import { useEffect, useState } from "react";
-import { DragonFieldTypes } from "./Types.ts";
+
+import { DragonFieldTypes } from "./types/DMRFieldTypes";
 
 function App() {
 	const [versions, setVersions] = useState<VersionsProp>({});

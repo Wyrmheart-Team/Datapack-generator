@@ -1,10 +1,10 @@
 import styled from "styled-components";
 import { Box } from "@mui/material";
 import { v4 as uuidv4 } from "uuid";
-import { Button, Container, Title } from "../../StyledProps.tsx";
-import { Dragon } from "../../Types.ts";
+import { Button, Container, Title } from "../app/StyledProps.tsx";
+import { Dragon } from "../types/DMRTypes";
 
-export function DragonList({
+export function DragonListComponent({
 	dragons,
 	setDragons,
 	selectedDragon,

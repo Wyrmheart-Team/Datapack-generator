@@ -1,4 +1,4 @@
-import { FieldProp } from "../../App.tsx";
+import { FieldProp } from "../App.tsx";
 import { JSX, useState } from "react";
 import {
 	Autocomplete,
@@ -12,9 +12,10 @@ import {
 	KeyValuePairInput,
 	ColorField,
 	StrictNumericTextField,
-} from "../../StyledProps.tsx";
-import { FormInput } from "../../Form.tsx";
-import { Dragon, DragonFieldTypes } from "../../Types.ts";
+} from "../app/StyledProps.tsx";
+import { FormInput } from "../app/Form.tsx";
+import { Dragon } from "../types/DMRTypes";
+import { DragonFieldTypes } from "../types/DMRFieldTypes";
 
 type DragonFieldsProps = {
 	field: FieldProp;
@@ -30,7 +31,7 @@ type DragonFieldsProps = {
 	soundEvents: string[];
 };
 
-export const DragonFields = ({
+export const DragonFieldComponent = ({
 	field,
 	selectedDragon,
 	dragons,
@@ -139,6 +140,7 @@ export const DragonFields = ({
 				autoHighlight
 				disableClearable
 				filterSelectedOptions
+				limitTags={field.multiple ? 3 : 1}
 				multiple={field.multiple}
 				renderInput={(params) => (
 					<FormInput
@@ -183,6 +185,7 @@ export const DragonFields = ({
 				disableClearable
 				filterSelectedOptions
 				multiple={field.multiple && field.options}
+				limitTags={3}
 				renderInput={(params) => (
 					<FormInput
 						autoComplete="off"
@@ -228,6 +231,7 @@ export const DragonFields = ({
 				disableClearable
 				filterSelectedOptions
 				multiple={field.multiple && field.options}
+				limitTags={3}
 				renderInput={(params) => (
 					<FormInput
 						autoComplete="off"
@@ -279,6 +283,7 @@ export const DragonFields = ({
 				}}
 				label={field.name}
 				options={attributes}
+				limitTags={3}
 				InputProps={{
 					// @ts-expect-error Stuff
 					endAdornment: (

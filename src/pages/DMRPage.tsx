@@ -1,18 +1,18 @@
-import { Page } from "../../App.tsx";
+import { Page } from "../App.tsx";
 import { Box } from "@mui/material";
 import { useEffect, useState } from "react";
-import JSZip from "jszip";
 
-import { DatapackInfo } from "./DatapackInfo.tsx";
-import { DragonList } from "./DragonList.tsx";
-import { DragonFields } from "./DragonFields.tsx";
+import { DatapackInfoComponent } from "../components/DatapackInfoComponent.tsx";
+import { DragonListComponent } from "../components/DragonListComponent.tsx";
+import { DragonFieldComponent } from "../components/DragonFieldComponent.tsx";
 import {
 	Button,
 	Container,
 	FileInputWithTextField,
-} from "../../StyledProps.tsx";
-import { FormInput, SectionAccordion, useForm } from "../../Form.tsx";
-import { Armor, Dragon, DragonFieldTypes, Mode } from "../../Types.ts";
+} from "../app/StyledProps.tsx";
+import { FormInput, SectionAccordion, useForm } from "../app/Form.tsx";
+import { Armor, Dragon, Mode } from "../types/DMRTypes";
+import { saveDatapack } from "../generation/DMRPackGeneration.ts";
 
 const DMRPage = ({
 	versions,
@@ -47,144 +47,7 @@ const DMRPage = ({
 				return;
 			}
 
-			if (markedForSave === "zip") {
-				const zip = new JSZip();
-				const resourceZip = new JSZip();
-				const dataZip = new JSZip();
-
-				const lang: { [key: string]: string } = {};
-
-				// Add dragons to zip
-				dragons.forEach((dragon) => {
-					const dragonId = dragon.name!.toLowerCase().replace(/ /g, "_");
-					const name = dragon.name!;
-
-					if (dragon.model) {
-						resourceZip.file(
-							`assets/${datapackId}/geo/${dragonId}.json`,
-							dragon.model
-						);
-					}
-
-					if (dragon.animation) {
-						resourceZip.file(
-							`assets/${datapackId}/animations/${dragonId}.animation.json`,
-							dragon.animation
-						);
-					}
-
-					resourceZip.file(
-						`assets/${datapackId}/textures/entity/dragon/${dragonId}/body.png`,
-						dragon.texture
-					);
-
-					if (dragon.saddleTexture) {
-						resourceZip.file(
-							`assets/${datapackId}/textures/entity/dragon/${dragonId}/saddle.png`,
-							dragon.saddleTexture
-						);
-					}
-
-					if (dragon.glowTexture) {
-						resourceZip.file(
-							`assets/${datapackId}/textures/entity/dragon/${dragonId}/glow.png`,
-							dragon.glowTexture
-						);
-					}
-
-					lang[`${datapackId}.dragon_breed.${dragonId}`] = `${name} Dragon`;
-					lang[`item.${datapackId}.dragon_spawn_egg.${dragonId}`] =
-						`${name} Dragon Spawn Egg`;
-					lang[`block.${datapackId}.dragon_egg.${dragonId}`] =
-						`${name} Dragon Egg`;
-
-					const get = <T,>(
-						accessor: (fields: DragonFieldTypes) => T | undefined
-					): T | undefined => {
-						return dragon.fields ? accessor(dragon.fields) : undefined;
-					};
-
-					const getAndDo = <T,>(
-						accessor: (fields: DragonFieldTypes) => T | undefined,
-						perform: (value: T) => T
-					): T | undefined => {
-						const value = get(accessor);
-						return value ? perform(value) : undefined;
-					};
-
-					const data: Partial<
-						Record<
-							keyof DragonFieldTypes | "model_location" | "animation_location",
-							any
-						>
-					> = {
-						...dragon.fields,
-						model_location: dragon.model
-							? `${datapackId}:geo/${dragonId}.json`
-							: undefined,
-						animation_location: dragon.animation
-							? `${datapackId}:animations/${dragonId}.animation.json`
-							: undefined,
-						//TODO Add chance to loot tables
-						loot_tables: getAndDo(
-							(d) => d.loot_tables,
-							(d) =>
-								d.map((item: string) => {
-									return { table: item, min: 1, max: 1, chance: 0.1 };
-								})
-						),
-					};
-
-					dataZip.file(
-						`data/${datapackId}/dmr/breeds/${dragonId}.json`,
-						JSON.stringify(data, null, 2)
-					);
-				});
-
-				resourceZip.file(
-					`assets/${datapackId}/lang/en_us.json`,
-					JSON.stringify(lang, null, 2)
-				);
-
-				resourceZip.file(
-					`pack.mcmeta`,
-					JSON.stringify(
-						{
-							pack: {
-								pack_format: "22",
-								description: `Textures for ${datapackName}`,
-							},
-						},
-						null,
-						2
-					)
-				);
-
-				const generatePack = async () => {
-					zip.file(
-						`${datapackId} - Resource Pack.zip`,
-						await resourceZip.generateAsync({ type: "blob" })
-					);
-					zip.file(
-						`${datapackId} - Data Pack.zip`,
-						await dataZip.generateAsync({ type: "blob" })
-					);
-
-					const zipBlob = await zip.generateAsync({ type: "blob" });
-
-					// Trigger download
-					const url = URL.createObjectURL(zipBlob);
-					const link = document.createElement("a");
-					link.href = url;
-					link.download = `${datapackName} - Bundled.zip`;
-					link.click();
-
-					// Clean up
-					URL.revokeObjectURL(url);
-				};
-
-				generatePack();
-			}
+			saveDatapack(markedForSave, dragons, datapackId, datapackName);
 		}
 	}, [markedForSave]);
 
@@ -254,7 +117,7 @@ const DMRPage = ({
 					display: "flex",
 				}}
 			>
-				<DatapackInfo
+				<DatapackInfoComponent
 					versions={versions}
 					selectedVersion={selectedVersion}
 					setSelectedVersion={setSelectedVersion}
@@ -267,7 +130,7 @@ const DMRPage = ({
 				/>
 
 				{mode === "dragon" && (
-					<DragonList
+					<DragonListComponent
 						dragons={dragons}
 						setDragons={setDragons}
 						selectedDragon={selectedDragon}
@@ -475,7 +338,8 @@ const DMRPage = ({
 										.filter((s) => s.version === selectedVersion)
 										.flatMap((s) => s.dragonFields)
 										.map((field) => (
-											<DragonFields
+											<DragonFieldComponent
+												key={field.name}
 												field={field}
 												selectedDragon={selectedDragon}
 												dragons={dragons}

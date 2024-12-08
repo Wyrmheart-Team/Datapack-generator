@@ -1,7 +1,8 @@
 import styled from "styled-components";
 import { NavLink as Link, useLocation } from "react-router-dom";
-import { Button, IconButton } from "@mui/material";
+import { IconButton, Tooltip } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 // Nav: The container for the entire navigation bar
 export const Nav = styled.nav`
 	background: #282c34;
@@ -13,7 +14,7 @@ export const Nav = styled.nav`
 	position: sticky;
 	top: 0;
 	left: 0;
-	z-index: 2000;
+	z-index: 1;
 `;
 
 // NavMenu: A container for the navigation links (usually in a row)
@@ -58,24 +59,32 @@ export const Title = styled.h1`
 `;
 
 const Navbar = ({ onSave }: { onSave: (arg: string) => void }) => {
-	const location = useLocation();
 	return (
 		<>
 			<Nav>
 				<Title>Wyrmheart Team - Datapack Generator</Title>
-				{/* <SaveButton */}
-				{/* 	onClick={() => onSave("mod")} */}
-				{/* 	sx={{ */}
-				{/* 		right: "200px !important", */}
-				{/* 	}} */}
-				{/* > */}
-				{/* 	<SaveIcon /> */}
-				{/* 	Save as Mod */}
-				{/* </SaveButton> */}
-				<SaveButton onClick={() => onSave("zip")}>
-					<SaveIcon />
-					Save as Zip
-				</SaveButton>
+				<SaveSection>
+					<Tooltip
+						title="Save as Mod, will generate a .jar file that you can drop into your mods folder and run (required on both server and client)."
+						arrow
+					>
+						<SaveButton onClick={() => onSave("mod")}>
+							<SaveIcon />
+							Save as Mod
+						</SaveButton>
+					</Tooltip>
+					<Tooltip
+						title={
+							"Save as Zip, will generate a zip bundle containing a resource pack zip and a datapack zip which has to be installed in the normal folders."
+						}
+						arrow
+					>
+						<SaveButton onClick={() => onSave("zip")}>
+							<SaveIcon />
+							Save as Zip
+						</SaveButton>
+					</Tooltip>
+				</SaveSection>
 				<NavMenu>
 					<NavLink to="/Datapack-generator/">DMR</NavLink>
 				</NavMenu>
@@ -83,6 +92,14 @@ const Navbar = ({ onSave }: { onSave: (arg: string) => void }) => {
 		</>
 	);
 };
+
+const SaveSection = styled.div`
+	display: flex;
+	flex-direction: row;
+	gap: 6px;
+	right: 10px;
+	position: absolute;
+`;
 
 const SaveButton = styled(IconButton)`
 	background-color: #007bff !important;
@@ -92,9 +109,7 @@ const SaveButton = styled(IconButton)`
 	padding: 0.5rem;
 	font-size: 16px;
 	cursor: pointer;
-	position: absolute !important;
-	right: 20px !important;
-	top: 50px !important;
+	width: 200px;
 `;
 
 export default Navbar;

@@ -5,5 +5,5 @@ import net.neoforged.fml.common.Mod;
 @Mod( DMRDatapack.MODID)
 public class DMRDatapack
 {
-    public static final String MODID = "dmr_datapack";
+    public static final String MODID = "placeholdertextx";
 }
