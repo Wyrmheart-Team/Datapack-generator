@@ -1,0 +1,16 @@
+modLoader="javafml" 
+loaderVersion="[4,)" 
+license="All Rights Reserved"
+[[mods]] 
+modId="placeholdertextx" 
+version="1.0.0" 
+displayName="A datapack for the DMR mod" 
+description='''A datapack for the DMR mod'''
+showAsDataPack = true
+showAsResourcePack = true
+
+[[dependencies.placeholdertextx]]
+modId = "dmr"
+type = "optional"
+ordering = "BEFORE"
+side = "BOTH"
