@@ -134,8 +134,8 @@ export function FileInputWithTextField({
 			/>
 
 			<FormInput
-				isDirty={isDirty}
-				setIsDirty={setIsDirty}
+				$isDirty={isDirty}
+				$setIsDirty={setIsDirty}
 				value={fileName}
 				name={label}
 				label={label}
@@ -214,6 +214,7 @@ export const KeyValuePairInput: React.FC<{
 				options={options ?? []}
 				value={pairs.map((pair) => `${pair.key}=${pair.value}`)}
 				onChange={(event, newValues, reason) => {
+					console.log(newValues, reason);
 					if (reason === "selectOption") {
 						// Appending "=" only when an option is explicitly selected
 						const selectedOption = newValues[newValues.length - 1];
@@ -237,6 +238,18 @@ export const KeyValuePairInput: React.FC<{
 						setError(""); // Clear error on new input
 					}
 				}}
+				filterOptions={(options, params) => {
+					const value = pairs.map((pair) => pair.key);
+					const filtered = options.filter((option) => {
+						return value.indexOf(option) === -1;
+					});
+
+					if (params.inputValue !== "") {
+						filtered.push(params.inputValue);
+					}
+
+					return filtered;
+				}}
 				onKeyDown={(e) => {
 					if (e.key === "Enter" && isValidPair(inputValue)) {
 						handleAddPair(inputValue);
@@ -249,7 +262,9 @@ export const KeyValuePairInput: React.FC<{
 					value.map((option, index) => (
 						<Chip
 							label={option}
-							{...getTagProps({ index })}
+							className={getTagProps({ index }).className}
+							key={getTagProps({ index }).key}
+							disabled={getTagProps({ index }).disabled}
 							onDelete={() => handleDeletePair(pairs[index])}
 						/>
 					))

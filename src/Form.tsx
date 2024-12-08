@@ -104,8 +104,8 @@ export const useForm = () => {
 interface FormInputProps extends Omit<TextFieldProps, "name"> {
 	name: string; // Ensure name is required for form registration
 	required?: boolean;
-	isDirty?: boolean;
-	setIsDirty?: (isDirty: boolean) => void;
+	$isDirty?: boolean;
+	$setIsDirty?: (isDirty: boolean) => void;
 }
 
 export const FormInput: React.FC<FormInputProps> = ({
@@ -121,11 +121,11 @@ export const FormInput: React.FC<FormInputProps> = ({
 	}, [name, required, registerField, unregisterField]);
 
 	useEffect(() => {
-		if (props.isDirty && props.setIsDirty) {
-			props.setIsDirty(false);
+		if (props.$isDirty && props.$setIsDirty) {
+			props.$setIsDirty(false);
 			setFieldValue(name, props.value as string);
 		}
-	}, [props.isDirty, props.value, name, setFieldValue]);
+	}, [props.$isDirty, props.value, name, setFieldValue]);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setFieldValue(name, e.target.value); // Update the value in the form context

@@ -5,32 +5,14 @@ import JSZip from "jszip";
 
 import { DatapackInfo } from "./DatapackInfo.tsx";
 import { DragonList } from "./DragonList.tsx";
-import { dragonFields } from "./DragonFields.tsx";
+import { DragonFields } from "./DragonFields.tsx";
 import {
 	Button,
 	Container,
 	FileInputWithTextField,
 } from "../../StyledProps.tsx";
 import { FormInput, SectionAccordion, useForm } from "../../Form.tsx";
-
-export type Dragon = {
-	name?: string;
-	id: string;
-	texture?: File;
-	glowTexture?: File;
-	saddleTexture?: File;
-	model?: File;
-	animation?: File;
-	fields?: {
-		[key: string]: any;
-	};
-};
-
-export type Armor = {
-	name: string;
-};
-
-export type Mode = "dragon" | "armor";
+import { Armor, Dragon, DragonFieldTypes, Mode } from "../../Types.ts";
 
 const DMRPage = ({
 	versions,
@@ -59,7 +41,6 @@ const DMRPage = ({
 			setMarkedForSave("");
 
 			const isValid = form.validate();
-			console.log("isValid", isValid);
 
 			if (!isValid) {
 				alert("Please fill out all required fields before saving.");
@@ -117,35 +98,46 @@ const DMRPage = ({
 					lang[`block.${datapackId}.dragon_egg.${dragonId}`] =
 						`${name} Dragon Egg`;
 
-					const attributes = dragon.fields?.attributes?.reduce(
-						(acc: any, item: string) => {
-							const [key, value] = item.split("=");
-							acc[key] = value;
-							return acc;
-						},
-						{}
-					);
+					const get = <T,>(
+						accessor: (fields: DragonFieldTypes) => T | undefined
+					): T | undefined => {
+						return dragon.fields ? accessor(dragon.fields) : undefined;
+					};
+
+					const getAndDo = <T,>(
+						accessor: (fields: DragonFieldTypes) => T | undefined,
+						perform: (value: T) => T
+					): T | undefined => {
+						const value = get(accessor);
+						return value ? perform(value) : undefined;
+					};
+
+					const data: Partial<
+						Record<
+							keyof DragonFieldTypes | "model_location" | "animation_location",
+							any
+						>
+					> = {
+						...dragon.fields,
+						model_location: dragon.model
+							? `${datapackId}:geo/${dragonId}.json`
+							: undefined,
+						animation_location: dragon.animation
+							? `${datapackId}:animations/${dragonId}.animation.json`
+							: undefined,
+						//TODO Add chance to loot tables
+						loot_tables: getAndDo(
+							(d) => d.loot_tables,
+							(d) =>
+								d.map((item: string) => {
+									return { table: item, min: 1, max: 1, chance: 0.1 };
+								})
+						),
+					};
 
 					dataZip.file(
 						`data/${datapackId}/dmr/breeds/${dragonId}.json`,
-						JSON.stringify({
-							attributes:
-								attributes && attributes.length > 0
-									? {
-											...attributes,
-										}
-									: undefined,
-							//TODO Add chance to loot tables
-							loot_tables: dragon.fields?.loot_tables.map((item: string) => {
-								return { table: item, min: 1, max: 1, chance: 0.1 };
-							}),
-							hatch_particles: dragon.fields?.hatch_particles
-								? { type: dragon.fields?.hatch_particles }
-								: undefined,
-							primary_color: hexToInt(dragon.fields?.primary_color),
-							secondary_color: hexToInt(dragon.fields?.secondary_color),
-							...dragon.fields,
-						})
+						JSON.stringify(data, null, 2)
 					);
 				});
 
@@ -195,13 +187,6 @@ const DMRPage = ({
 			}
 		}
 	}, [markedForSave]);
-
-	const hexToInt = (hex?: string) => {
-		if (!hex) return undefined;
-
-		const sanitizedHex = hex.replace("#", "");
-		return parseInt(sanitizedHex, 16);
-	};
 
 	useEffect(() => {
 		const fetchFiles = async () => {
@@ -489,21 +474,21 @@ const DMRPage = ({
 									fields
 										.filter((s) => s.version === selectedVersion)
 										.flatMap((s) => s.dragonFields)
-										.map((field) =>
-											dragonFields(
-												field,
-												selectedDragon,
-												dragons,
-												setDragons,
-												setSelectedDragon,
-												items,
-												attributes,
-												damageTypes,
-												lootTables,
-												particles,
-												soundEvents
-											)
-										)}
+										.map((field) => (
+											<DragonFields
+												field={field}
+												selectedDragon={selectedDragon}
+												dragons={dragons}
+												setDragons={setDragons}
+												setSelectedDragon={setSelectedDragon}
+												items={items}
+												attributes={attributes}
+												damageTypes={damageTypes}
+												lootTables={lootTables}
+												particles={particles}
+												soundEvents={soundEvents}
+											/>
+										))}
 							</Box>
 						</SectionAccordion>
 					</Container>

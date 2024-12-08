@@ -1,7 +1,7 @@
 import { Box, MenuItem } from "@mui/material";
-import { Mode } from "./DMR.tsx";
 import { Container, SelectField, Title } from "../../StyledProps.tsx";
 import { FormInput } from "../../Form.tsx";
+import { Mode } from "../../Types.ts";
 
 type DatapackInfoProps = {
 	versions: string[];
@@ -65,7 +65,9 @@ export function DatapackInfo({
 						name="datapackId"
 						required={true}
 						value={datapackId}
-						onChange={(event) => setDatapackId(event.target.value)}
+						onChange={(event) =>
+							setDatapackId(event.target.value.toLowerCase().replace(/ /g, "_"))
+						}
 					/>
 					{versions && (
 						<>
