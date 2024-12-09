@@ -1,8 +1,9 @@
 import styled from "styled-components";
 import { Box } from "@mui/material";
 import { v4 as uuidv4 } from "uuid";
-import { Button, Container, Title } from "../app/StyledProps.tsx";
+import { Button, Container, RaisedBox, Title } from "../app/StyledProps.tsx";
 import { Dragon } from "../types/DMRTypes";
+import { FieldsSection } from "../pages/DMRPage.tsx";
 
 export function DragonListComponent({
 	dragons,
@@ -21,17 +22,17 @@ export function DragonListComponent({
 			style={{ flex: "0 1 300px", maxHeight: "75vh", height: "75vh" }}
 		>
 			<Title>Dragons</Title>
-			<Box
+			<FieldsSection
+				// @ts-expect-error Stuff
 				component="form"
 				sx={{
-					display: "flex",
-					flexDirection: "column",
 					gap: 2,
-					padding: "10px",
-					overflowY: "scroll",
+				}}
+				style={{
+					height: "100%",
 				}}
 			>
-				<Button
+				<NewDragonButton
 					key="newDragon"
 					type="button"
 					onClick={() => {
@@ -44,7 +45,7 @@ export function DragonListComponent({
 					}}
 				>
 					[Add new dragon]
-				</Button>
+				</NewDragonButton>
 
 				{dragons &&
 					dragons.map((dragon) => (
@@ -59,12 +60,25 @@ export function DragonListComponent({
 							{dragon.name !== "" ? dragon.name : "Unnamed Dragon"}
 						</DragonButton>
 					))}
-			</Box>
+			</FieldsSection>
 		</Container>
 	);
 }
 
+const NewDragonButton = styled(Button)`
+	${RaisedBox};
+	background-color: #3f51b5;
+	color: white;
+	border-radius: 0.5rem;
+	transition: all 0.3s;
+
+	&:hover {
+		background-color: #303f9f;
+	}
+`;
+
 export const DragonButton = styled(Button)<{ $isSelected: boolean }>`
+	${RaisedBox};
 	background-color: ${(props) => (props.$isSelected ? "#4caf50" : "#255826")};
 	color: ${(props) => ((props as any["$isSelected"]) ? "white" : "black")};
 

@@ -200,6 +200,11 @@ export const SectionAccordion: React.FC<SectionAccordionProps> = ({
 			{...accordionProps}
 			expanded={expanded}
 			onChange={handleAccordionChange}
+			sx={{
+				borderRadius: "15px",
+				":before": { backgroundColor: "transparent" },
+				"& .MuiInputBase-root": { borderRadius: "15px" },
+			}}
 		>
 			<AccordionSummary
 				expandIcon={<ExpandMoreIcon style={{ color: "white" }} />}

@@ -9,10 +9,12 @@ import {
 	Button,
 	Container,
 	FileInputWithTextField,
+	IndentedBox,
 } from "../app/StyledProps.tsx";
 import { FormInput, SectionAccordion, useForm } from "../app/Form.tsx";
 import { Armor, Dragon, Mode } from "../types/DMRTypes";
 import { saveDatapack } from "../generation/DMRPackGeneration.ts";
+import styled from "styled-components";
 
 const DMRPage = ({
 	versions,
@@ -171,195 +173,199 @@ const DMRPage = ({
 						>
 							Delete
 						</Button>
-
-						<SectionAccordion defaultExpanded title="Info">
-							<Box
-								component="form"
-								sx={{
-									display: "flex",
-									flexDirection: "column",
-									gap: 6,
-									paddingBottom: "40px",
-								}}
-							>
-								<FormInput
-									type="text"
-									label="Name"
-									name="name"
-									value={selectedDragon.name}
-									required={true}
-									onChange={(event) => {
-										let dragon = dragons.find(
-											(d) => d.id === selectedDragon.id
-										)!;
-										dragon!.name = event.target.value;
-
-										setDragons(
-											dragons.map((d) =>
-												d.id === selectedDragon.id ? dragon : d
-											)
-										);
-										setSelectedDragon(dragon);
+						<ValueFieldSection
+							sx={{
+								gap: 1,
+								height: "100%",
+							}}
+						>
+							<SectionAccordion defaultExpanded title="Info">
+								<ValueFieldSection
+									// @ts-expect-error Stuff
+									component="form"
+									sx={{
+										gap: 6,
 									}}
-								/>
-							</Box>
-						</SectionAccordion>
+								>
+									<FormInput
+										type="text"
+										label="Name"
+										name="name"
+										value={selectedDragon.name}
+										required={true}
+										onChange={(event) => {
+											let dragon = dragons.find(
+												(d) => d.id === selectedDragon.id
+											)!;
+											dragon!.name = event.target.value;
 
-						<SectionAccordion title="Model/Animations">
-							<Box
-								component="form"
-								sx={{
-									display: "flex",
-									flexDirection: "column",
-									gap: 6,
-									padding: "10px",
-									overflowY: "scroll",
-									paddingBottom: "40px",
-								}}
-							>
-								<FileInputWithTextField
-									label="Model"
-									fileTypes=".json"
-									onChange={(file) => {
-										let dragon = dragons.find(
-											(d) => d.id === selectedDragon.id
-										)!;
-										dragon.model = file;
+											setDragons(
+												dragons.map((d) =>
+													d.id === selectedDragon.id ? dragon : d
+												)
+											);
+											setSelectedDragon(dragon);
+										}}
+									/>
+								</ValueFieldSection>
+							</SectionAccordion>
 
-										setDragons(
-											dragons.map((d) =>
-												d.id === selectedDragon.id ? dragon : d
-											)
-										);
-										setSelectedDragon(dragon);
+							<SectionAccordion title="Model/Animations">
+								<ValueFieldSection
+									// @ts-expect-error Stuff
+									component="form"
+									sx={{
+										gap: 6,
 									}}
-								/>
-								<FileInputWithTextField
-									label="Animation"
-									fileTypes=".json"
-									onChange={(file) => {
-										let dragon = dragons.find(
-											(d) => d.id === selectedDragon.id
-										)!;
-										dragon.animation = file;
+								>
+									<FileInputWithTextField
+										label="Model"
+										fileTypes=".json"
+										onChange={(file) => {
+											let dragon = dragons.find(
+												(d) => d.id === selectedDragon.id
+											)!;
+											dragon.model = file;
 
-										setDragons(
-											dragons.map((d) =>
-												d.id === selectedDragon.id ? dragon : d
-											)
-										);
-										setSelectedDragon(dragon);
+											setDragons(
+												dragons.map((d) =>
+													d.id === selectedDragon.id ? dragon : d
+												)
+											);
+											setSelectedDragon(dragon);
+										}}
+									/>
+									<FileInputWithTextField
+										label="Animation"
+										fileTypes=".json"
+										onChange={(file) => {
+											let dragon = dragons.find(
+												(d) => d.id === selectedDragon.id
+											)!;
+											dragon.animation = file;
+
+											setDragons(
+												dragons.map((d) =>
+													d.id === selectedDragon.id ? dragon : d
+												)
+											);
+											setSelectedDragon(dragon);
+										}}
+									/>
+								</ValueFieldSection>
+							</SectionAccordion>
+
+							<SectionAccordion defaultExpanded title="Textures">
+								<ValueFieldSection
+									// @ts-expect-error Stuff
+									component="form"
+									sx={{
+										gap: 6,
 									}}
-								/>
-							</Box>
-						</SectionAccordion>
+								>
+									<FileInputWithTextField
+										label="Skin texture"
+										fileTypes=".png,.jpg,.jpeg"
+										required={true}
+										onChange={(file) => {
+											let dragon = dragons.find(
+												(d) => d.id === selectedDragon.id
+											)!;
+											dragon.texture = file;
 
-						<SectionAccordion defaultExpanded title="Textures">
-							<Box
-								component="form"
-								sx={{
-									display: "flex",
-									flexDirection: "column",
-									gap: 6,
-									padding: "10px",
-									overflowY: "scroll",
-									paddingBottom: "40px",
-								}}
-							>
-								<FileInputWithTextField
-									label="Skin texture"
-									fileTypes=".png,.jpg,.jpeg"
-									required={true}
-									onChange={(file) => {
-										let dragon = dragons.find(
-											(d) => d.id === selectedDragon.id
-										)!;
-										dragon.texture = file;
+											setDragons(
+												dragons.map((d) =>
+													d.id === selectedDragon.id ? dragon : d
+												)
+											);
+											setSelectedDragon(dragon);
+										}}
+									/>
+									<FileInputWithTextField
+										label="Saddle texture"
+										fileTypes=".png,.jpg,.jpeg"
+										onChange={(file) => {
+											let dragon = dragons.find(
+												(d) => d.id === selectedDragon.id
+											)!;
+											dragon.saddleTexture = file;
 
-										setDragons(
-											dragons.map((d) =>
-												d.id === selectedDragon.id ? dragon : d
-											)
-										);
-										setSelectedDragon(dragon);
+											setDragons(
+												dragons.map((d) =>
+													d.id === selectedDragon.id ? dragon : d
+												)
+											);
+											setSelectedDragon(dragon);
+										}}
+									/>
+									<FileInputWithTextField
+										label="Glow texture"
+										fileTypes=".png,.jpg,.jpeg"
+										onChange={(file) => {
+											let dragon = dragons.find(
+												(d) => d.id === selectedDragon.id
+											)!;
+											dragon.glowTexture = file;
+
+											setDragons(
+												dragons.map((d) =>
+													d.id === selectedDragon.id ? dragon : d
+												)
+											);
+											setSelectedDragon(dragon);
+										}}
+									/>
+								</ValueFieldSection>
+							</SectionAccordion>
+
+							<SectionAccordion title="Fields/Values">
+								<ValueFieldSection
+									// @ts-expect-error Stuff
+									component="form"
+									sx={{
+										gap: 6,
 									}}
-								/>
-								<FileInputWithTextField
-									label="Saddle texture"
-									fileTypes=".png,.jpg,.jpeg"
-									onChange={(file) => {
-										let dragon = dragons.find(
-											(d) => d.id === selectedDragon.id
-										)!;
-										dragon.saddleTexture = file;
-
-										setDragons(
-											dragons.map((d) =>
-												d.id === selectedDragon.id ? dragon : d
-											)
-										);
-										setSelectedDragon(dragon);
-									}}
-								/>
-								<FileInputWithTextField
-									label="Glow texture"
-									fileTypes=".png,.jpg,.jpeg"
-									onChange={(file) => {
-										let dragon = dragons.find(
-											(d) => d.id === selectedDragon.id
-										)!;
-										dragon.glowTexture = file;
-
-										setDragons(
-											dragons.map((d) =>
-												d.id === selectedDragon.id ? dragon : d
-											)
-										);
-										setSelectedDragon(dragon);
-									}}
-								/>
-							</Box>
-						</SectionAccordion>
-
-						<SectionAccordion title="Fields/Values">
-							<Box
-								component="form"
-								sx={{
-									display: "flex",
-									flexDirection: "column",
-									gap: 6,
-									padding: "10px",
-									overflowY: "scroll",
-									paddingBottom: "40px",
-								}}
-							>
-								{selectedVersion &&
-									fields
-										.filter((s) => s.version === selectedVersion)
-										.flatMap((s) => s.dragonFields)
-										.map((field) => (
-											<DragonFieldComponent
-												key={field.name}
-												field={field}
-												selectedDragon={selectedDragon}
-												dragons={dragons}
-												setDragons={setDragons}
-												setSelectedDragon={setSelectedDragon}
-												items={items}
-												attributes={attributes}
-												damageTypes={damageTypes}
-												lootTables={lootTables}
-												particles={particles}
-												soundEvents={soundEvents}
-											/>
-										))}
-							</Box>
-						</SectionAccordion>
+								>
+									{selectedVersion &&
+										fields
+											.filter((s) => s.version === selectedVersion)
+											.flatMap((s) => s.dragonFields)
+											.map((field) => (
+												<DragonFieldComponent
+													key={field.name}
+													field={field}
+													selectedDragon={selectedDragon}
+													dragons={dragons}
+													setDragons={setDragons}
+													setSelectedDragon={setSelectedDragon}
+													items={items}
+													attributes={attributes}
+													damageTypes={damageTypes}
+													lootTables={lootTables}
+													particles={particles}
+													soundEvents={soundEvents}
+												/>
+											))}
+								</ValueFieldSection>
+							</SectionAccordion>
+						</ValueFieldSection>
 					</Container>
 				)}
 			</Box>
 		</>
 	);
 };
+
+export const FieldsSection = styled(Box)`
+	${IndentedBox};
+	display: flex;
+	flex-direction: column;
+	padding: 20px;
+	overflow-y: scroll;
+`;
+
+const ValueFieldSection = styled(FieldsSection)`
+	padding-bottom: 40px;
+`;
 
 export default DMRPage;

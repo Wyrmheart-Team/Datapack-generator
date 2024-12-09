@@ -2,6 +2,7 @@ import { Box, MenuItem } from "@mui/material";
 import { Container, SelectField, Title } from "../app/StyledProps.tsx";
 import { FormInput } from "../app/Form.tsx";
 import { Mode } from "../types/DMRTypes";
+import { FieldsSection } from "../pages/DMRPage.tsx";
 
 type DatapackInfoProps = {
 	versions: string[];
@@ -39,16 +40,15 @@ export function DatapackInfoComponent({
 				key="datapack-info"
 				style={{
 					flex: "0 1 250px",
+					width: "250px",
 				}}
 			>
 				<Title>Datapack info</Title>
-				<Box
+				<FieldsSection
+					// @ts-expect-error Stuff
 					component="form"
 					sx={{
-						display: "flex",
-						flexDirection: "column",
 						gap: 6,
-						width: "100%",
 					}}
 				>
 					<FormInput
@@ -77,9 +77,6 @@ export function DatapackInfoComponent({
 								onChange={(event) =>
 									setSelectedVersion(event.target.value as string)
 								}
-								style={{
-									color: "white",
-								}}
 							>
 								{versions.reverse().map((version: string) => (
 									<MenuItem value={version} key={version}>
@@ -89,7 +86,7 @@ export function DatapackInfoComponent({
 							</SelectField>
 						</>
 					)}
-				</Box>
+				</FieldsSection>
 			</Container>
 			<Container style={{ flex: "1 1 200px" }} key="mode">
 				<Title>Mode</Title>

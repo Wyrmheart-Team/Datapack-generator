@@ -1,7 +1,5 @@
 import styled from "styled-components";
 import {
-	Accordion,
-	AccordionProps,
 	Autocomplete,
 	Box,
 	Chip,
@@ -11,11 +9,31 @@ import {
 	TextFieldProps,
 } from "@mui/material";
 import { MuiColorInput } from "mui-color-input";
-import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import { useState } from "react";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { default as MuiButton } from "@mui/material/Button";
 import { FormInput } from "./Form.tsx";
 import { v4 as uuidv4 } from "uuid";
+
+// Dark indented box
+export const IndentedBox = `
+	background-color: #282c34;
+	border: 1px solid #1f2229;
+	box-shadow:
+		inset 2px 2px 5px rgba(0, 0, 0, 0.6),
+		inset -2px -2px 5px rgba(55, 61, 73, 0.8);
+	border-radius: 5px;
+`;
+
+// Lighter complementary box
+export const RaisedBox = `
+	background-color: #3a3f4b;
+	border: 1px solid #4a505e;
+	box-shadow:
+		2px 2px 5px rgba(0, 0, 0, 0.4),
+		-2px -2px 5px rgba(255, 255, 255, 0.1);
+	border-radius: 5px;
+`;
 
 export const Title = styled.h1`
 	font-size: 24px;
@@ -39,12 +57,20 @@ const InputFieldStyled = styled(TextField)`
 	border-radius: 0.5rem;
 	padding: 10px;
 	font-size: 16px;
+	& .MuiInputBase-root {
+		${RaisedBox};
+	}
+
 	& .MuiInputBase-input {
 		color: white;
 	}
 
+	& .MuiInputLabel-root[data-shrink="true"] {
+		padding-top: 5px;
+	}
+
 	& .MuiInputLabel-root {
-		color: darkgray;
+		color: white;
 		font-style: italic;
 	}
 `;
@@ -53,6 +79,11 @@ export const SelectField = styled(Select)`
 	border: 1px solid #282c34;
 	border-radius: 0.5rem;
 	font-size: 16px;
+	${RaisedBox};
+
+	& .MuiSelect-select {
+		color: white;
+	}
 `;
 export const ColorField = styled(MuiColorInput)`
 	height: 2rem;
@@ -60,8 +91,17 @@ export const ColorField = styled(MuiColorInput)`
 	border-radius: 0.5rem;
 	padding: 10px;
 	font-size: 16px;
+
+	& .MuiInputBase-root {
+		${RaisedBox};
+	}
+
 	& .MuiInputBase-input {
 		color: white;
+	}
+
+	& .MuiInputLabel-root[data-shrink="true"] {
+		padding-top: 5px;
 	}
 
 	& .MuiInputLabel-root {
@@ -69,14 +109,13 @@ export const ColorField = styled(MuiColorInput)`
 		font-style: italic;
 	}
 `;
-export const Container = styled.div`
+export const Container = styled(Box)`
 	display: flex;
 	flex-direction: column;
 	background-color: #282c34;
 	border-radius: 15px;
 	padding: 20px;
 	margin: 20px;
-	width: 15vw;
 `;
 
 type InputFieldProps = TextFieldProps & {
