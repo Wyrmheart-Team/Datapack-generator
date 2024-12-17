@@ -1,20 +1,19 @@
 import { Page } from "../App.tsx";
 import { Box } from "@mui/material";
 import { useEffect, useState } from "react";
-
-import { DatapackInfoComponent } from "../components/DatapackInfoComponent.tsx";
-import { DragonListComponent } from "../components/DragonListComponent.tsx";
-import { DragonFieldComponent } from "../components/DragonFieldComponent.tsx";
-import {
-	Button,
-	Container,
-	FileInputWithTextField,
-	IndentedBox,
-} from "../app/StyledProps.tsx";
-import { FormInput, SectionAccordion, useForm } from "../app/Form.tsx";
-import { Armor, Dragon, Mode } from "../types/DMRTypes";
+import { ObjectListComponent } from "../components/ObjectListComponent.tsx";
+import { FormInput, useForm } from "../app/Form.tsx";
+import { Armor, BaseObjectProp, Dragon } from "../types/DMRTypes";
 import { saveDatapack } from "../generation/DMRPackGeneration.ts";
+import { ObjectInfoComponent } from "../components/ObjectInfoComponent.tsx";
+import { loadInitialState, saveToLocalStorage } from "../app/Utils.ts";
 import styled from "styled-components";
+import { Button, Title } from "../app/StyledProps.tsx";
+import CheckIcon from "@mui/icons-material/Check";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+
+const DRAGONS_KEY = "dragons";
+const ARMORS_KEY = "armors";
 
 const DMRPage = ({
 	versions,
@@ -22,12 +21,30 @@ const DMRPage = ({
 	markedForSave,
 	setMarkedForSave,
 }: Page) => {
-	const [selectedVersion, setSelectedVersion] = useState<string>("");
+	const [selectedVersion, setSelectedVersion] = useState<string>(() => {
+		return loadInitialState<string>("selectedVersion", "");
+	});
 
-	const [datapackName, setDatapackName] = useState<string>("");
-	const [datapackId, setDatapackId] = useState<string>("");
+	const [datapackName, setDatapackName] = useState<string>(() =>
+		loadInitialState<string>("datapackName", "")
+	);
+	const [datapackId, setDatapackId] = useState<string>(() =>
+		loadInitialState<string>("datapackId", "")
+	);
 
-	const [mode, setMode] = useState<Mode>("dragon");
+	const [showSettings, setShowSettings] = useState<boolean>(false);
+
+	useEffect(() => {
+		if (!datapackName && !showSettings) {
+			setShowSettings(true);
+		}
+	}, [datapackName]);
+
+	useEffect(() => {
+		if (!datapackId && !showSettings) {
+			setShowSettings(true);
+		}
+	}, [datapackId]);
 
 	const [items, setItems] = useState<string[]>([]);
 	const [attributes, setAttributes] = useState<string[]>([]);
@@ -35,6 +52,49 @@ const DMRPage = ({
 	const [lootTables, setLootTables] = useState<string[]>([]);
 	const [particles, setParticles] = useState<string[]>([]);
 	const [soundEvents, setSoundEvents] = useState<string[]>([]);
+
+	const [dragons, setDragons] = useState<Dragon[]>(() =>
+		loadInitialState<Dragon[]>(DRAGONS_KEY, [])
+	);
+	const [armors, setArmors] = useState<Armor[]>(() =>
+		loadInitialState<Armor[]>(ARMORS_KEY, [])
+	);
+
+	const [selectedDragon, setSelectedDragon] = useState<string | null>(() => {
+		return loadInitialState<string | null>("selectedDragonId", null);
+	});
+	const [selectedArmor, setSelectedArmor] = useState<string | null>(() => {
+		return loadInitialState<string | null>("selectedArmorId", null);
+	});
+
+	// Save logic
+	useEffect(() => {
+		saveToLocalStorage("datapackName", datapackName);
+	}, [datapackName]);
+
+	useEffect(() => {
+		saveToLocalStorage("datapackId", datapackId);
+	}, [datapackId]);
+
+	useEffect(() => {
+		saveToLocalStorage("selectedVersion", selectedVersion);
+	}, [selectedVersion]);
+
+	useEffect(() => {
+		saveToLocalStorage("selectedDragonId", selectedDragon ?? "");
+	}, [selectedDragon]);
+
+	useEffect(() => {
+		saveToLocalStorage("selectedArmorId", selectedArmor ?? "");
+	}, [selectedArmor]);
+
+	useEffect(() => {
+		saveToLocalStorage(DRAGONS_KEY, dragons);
+	}, [dragons]);
+
+	useEffect(() => {
+		saveToLocalStorage(ARMORS_KEY, armors);
+	}, [armors]);
 
 	const form = useForm();
 
@@ -60,37 +120,49 @@ const DMRPage = ({
 			try {
 				setItems(
 					(await (
-						await fetch(`generated/${selectedVersion}/items.json`)
+						await fetch(
+							`${import.meta.env.BASE_URL}generated/${selectedVersion}/items.json`
+						)
 					).json()) as string[]
 				);
 
 				setAttributes(
 					(await (
-						await fetch(`generated/${selectedVersion}/attributes.json`)
+						await fetch(
+							`${import.meta.env.BASE_URL}generated/${selectedVersion}/attributes.json`
+						)
 					).json()) as string[]
 				);
 
 				setDamageTypes(
 					(await (
-						await fetch(`generated/${selectedVersion}/damage_types.json`)
+						await fetch(
+							`${import.meta.env.BASE_URL}generated/${selectedVersion}/damage_types.json`
+						)
 					).json()) as string[]
 				);
 
 				setLootTables(
 					(await (
-						await fetch(`generated/${selectedVersion}/loot_tables.json`)
+						await fetch(
+							`${import.meta.env.BASE_URL}generated/${selectedVersion}/loot_tables.json`
+						)
 					).json()) as string[]
 				);
 
 				setParticles(
 					(await (
-						await fetch(`generated/${selectedVersion}/particles.json`)
+						await fetch(
+							`${import.meta.env.BASE_URL}generated/${selectedVersion}/particles.json`
+						)
 					).json()) as string[]
 				);
 
 				setSoundEvents(
 					(await (
-						await fetch(`generated/${selectedVersion}/sound_events.json`)
+						await fetch(
+							`${import.meta.env.BASE_URL}generated/${selectedVersion}/sound_events.json`
+						)
 					).json()) as string[]
 				);
 			} catch (err: any) {
@@ -100,12 +172,6 @@ const DMRPage = ({
 		fetchFiles();
 	}, [selectedVersion]);
 
-	const [dragons, setDragons] = useState<Dragon[]>([]);
-	const [armors, setArmors] = useState<Armor[]>([]);
-
-	const [selectedDragon, setSelectedDragon] = useState<Dragon | null>(null);
-	const [selectedArmor, setSelectedArmor] = useState<Armor | null>(null);
-
 	useEffect(() => {
 		if (!selectedVersion && versions) {
 			setSelectedVersion(versions.reverse()[0]);
@@ -114,258 +180,241 @@ const DMRPage = ({
 
 	return (
 		<>
+			{showSettings && (
+				<SettingsBackdrop>
+					<SettingsMenuStyle>
+						<Title
+							style={{
+								paddingLeft: 20,
+								paddingTop: 20,
+								margin: 0,
+							}}
+						>
+							Settings
+						</Title>
+						<Box
+							style={{
+								display: "flex",
+								flexDirection: "column",
+								flexGrow: 1,
+								gap: 50,
+								padding: 20,
+							}}
+						>
+							<FormInput
+								type="text"
+								label="Datapack name"
+								name="datapackName"
+								required={true}
+								value={datapackName}
+								onChange={(event) => {
+									setDatapackName(event.target.value);
+								}}
+							/>
+							<FormInput
+								type="text"
+								label="Datapack id"
+								name="datapackId"
+								required={true}
+								value={datapackId}
+								inputProps={{ maxLength: 16 }}
+								onChange={(event) => {
+									setDatapackId(
+										event.target.value.toLowerCase().replace(/ /g, "_")
+									);
+								}}
+							/>
+
+							<SettingsAcceptButton
+								disabled={!datapackId || !datapackName}
+								onClick={() => setShowSettings(false)}
+							>
+								<CheckIcon
+									sx={{
+										color: "white !important",
+									}}
+									style={{
+										transform: "translateX(-20%) translateY(20%)",
+										width: 20,
+										height: 20,
+									}}
+								/>
+								Accept
+							</SettingsAcceptButton>
+							{(dragons.length > 0 || armors.length > 0) && (
+								<SettingsClearButton
+									onClick={() => {
+										if (
+											window.confirm("Are you sure you wish to clear all data?")
+										) {
+											setDragons([]);
+											setArmors([]);
+											setSelectedDragon(null);
+											setSelectedArmor(null);
+										}
+									}}
+								>
+									<DeleteForeverIcon
+										style={{
+											transform: "translateX(-20%) translateY(20%)",
+											width: 20,
+											height: 20,
+										}}
+									/>
+									Clear data
+								</SettingsClearButton>
+							)}
+						</Box>
+					</SettingsMenuStyle>
+				</SettingsBackdrop>
+			)}
 			<Box
-				sx={{
+				style={{
 					display: "flex",
+					flexGrow: 1,
 				}}
 			>
-				<DatapackInfoComponent
+				<ObjectListComponent
+					setMarkedForSave={setMarkedForSave}
+					clearData={() => {
+						setDragons([]);
+						setArmors([]);
+						setSelectedDragon(null);
+						setSelectedArmor(null);
+					}}
 					versions={versions}
 					selectedVersion={selectedVersion}
 					setSelectedVersion={setSelectedVersion}
-					dataPackName={datapackName}
-					setDatapackName={setDatapackName}
-					datapackId={datapackId}
-					setDatapackId={setDatapackId}
-					mode={mode}
-					setMode={setMode}
+					objects={{ dragons, armors }}
+					addNewObject={(category) => {
+						let obj: BaseObjectProp = {
+							id: crypto.randomUUID(),
+							name: "",
+						};
+
+						if (category === "dragons") {
+							setDragons([...dragons, obj]);
+						} else if (category === "armors") {
+							setArmors([...armors, obj]);
+						}
+
+						return obj;
+					}}
+					removeObject={(category, object) => {
+						if (category === "dragons") {
+							const isConfirmed = window.confirm(
+								"Are you sure you wish to delete this dragon?"
+							);
+							if (!isConfirmed) return;
+
+							let selectedId = object?.id;
+							if (selectedId === selectedDragon) {
+								setSelectedDragon(null);
+							}
+
+							setDragons(dragons.filter((d) => d.id !== object.id));
+						} else if (category === "armors") {
+							const isConfirmed = window.confirm(
+								"Are you sure you wish to delete this armor?"
+							);
+							if (!isConfirmed) return;
+
+							let selectedId = object?.id;
+							if (selectedId === selectedArmor) {
+								setSelectedArmor(null);
+							}
+
+							setArmors(armors.filter((a) => a.id !== object.id));
+						}
+					}}
+					selectedObject={selectedDragon ?? selectedArmor}
+					setSelectedObject={(category, object) => {
+						if (category === "dragons") {
+							setSelectedDragon(object.id);
+							setSelectedArmor(null);
+						} else {
+							setSelectedArmor(object.id);
+							setSelectedDragon(null);
+						}
+					}}
+					defaultName={(mode) =>
+						mode === "dragons" ? "Unnamed Dragon" : "Unnamed Armor"
+					}
+					title={(mode) => (mode === "dragons" ? "Dragons" : "Armors")}
+					openSettings={function (): void {
+						setShowSettings(true);
+					}}
+					saveData={function (): void {
+						throw new Error("Function not implemented.");
+					}}
 				/>
 
-				{mode === "dragon" && (
-					<DragonListComponent
-						dragons={dragons}
-						setDragons={setDragons}
-						selectedDragon={selectedDragon}
-						setSelectedDragon={setSelectedDragon}
+				{selectedDragon && (
+					<ObjectInfoComponent<Dragon>
+						type="dragon"
+						objects={dragons}
+						object={dragons.find((d) => d.id === selectedDragon)!}
+						setObjects={(dragons) => setDragons(dragons)}
 					/>
 				)}
-
-				{mode === "dragon" && selectedDragon && (
-					<Container
-						style={{
-							overflowY: "auto",
-							flex: "1 0 auto",
-							maxHeight: "75vh",
-							height: "75vh",
-						}}
-					>
-						<Button
-							type="button"
-							onClick={() => {
-								const isConfirmed = window.confirm(
-									"Are you sure you wish to delete this dragon?"
-								);
-								if (!isConfirmed) return;
-
-								setDragons(dragons.filter((d) => d.id !== selectedDragon.id));
-								setSelectedDragon(null);
-							}}
-							style={{
-								backgroundColor: "indianred",
-								color: "white",
-								borderRadius: "0.5rem",
-								padding: "0.5rem",
-								marginBottom: "20px",
-								fontSize: "16px",
-								cursor: "pointer",
-								border: "1px solid #282c34",
-							}}
-						>
-							Delete
-						</Button>
-						<ValueFieldSection
-							sx={{
-								gap: 1,
-								height: "100%",
-							}}
-						>
-							<SectionAccordion defaultExpanded title="Info">
-								<ValueFieldSection
-									// @ts-expect-error Stuff
-									component="form"
-									sx={{
-										gap: 6,
-									}}
-								>
-									<FormInput
-										type="text"
-										label="Name"
-										name="name"
-										value={selectedDragon.name}
-										required={true}
-										onChange={(event) => {
-											let dragon = dragons.find(
-												(d) => d.id === selectedDragon.id
-											)!;
-											dragon!.name = event.target.value;
-
-											setDragons(
-												dragons.map((d) =>
-													d.id === selectedDragon.id ? dragon : d
-												)
-											);
-											setSelectedDragon(dragon);
-										}}
-									/>
-								</ValueFieldSection>
-							</SectionAccordion>
-
-							<SectionAccordion title="Model/Animations">
-								<ValueFieldSection
-									// @ts-expect-error Stuff
-									component="form"
-									sx={{
-										gap: 6,
-									}}
-								>
-									<FileInputWithTextField
-										label="Model"
-										fileTypes=".json"
-										onChange={(file) => {
-											let dragon = dragons.find(
-												(d) => d.id === selectedDragon.id
-											)!;
-											dragon.model = file;
-
-											setDragons(
-												dragons.map((d) =>
-													d.id === selectedDragon.id ? dragon : d
-												)
-											);
-											setSelectedDragon(dragon);
-										}}
-									/>
-									<FileInputWithTextField
-										label="Animation"
-										fileTypes=".json"
-										onChange={(file) => {
-											let dragon = dragons.find(
-												(d) => d.id === selectedDragon.id
-											)!;
-											dragon.animation = file;
-
-											setDragons(
-												dragons.map((d) =>
-													d.id === selectedDragon.id ? dragon : d
-												)
-											);
-											setSelectedDragon(dragon);
-										}}
-									/>
-								</ValueFieldSection>
-							</SectionAccordion>
-
-							<SectionAccordion defaultExpanded title="Textures">
-								<ValueFieldSection
-									// @ts-expect-error Stuff
-									component="form"
-									sx={{
-										gap: 6,
-									}}
-								>
-									<FileInputWithTextField
-										label="Skin texture"
-										fileTypes=".png,.jpg,.jpeg"
-										required={true}
-										onChange={(file) => {
-											let dragon = dragons.find(
-												(d) => d.id === selectedDragon.id
-											)!;
-											dragon.texture = file;
-
-											setDragons(
-												dragons.map((d) =>
-													d.id === selectedDragon.id ? dragon : d
-												)
-											);
-											setSelectedDragon(dragon);
-										}}
-									/>
-									<FileInputWithTextField
-										label="Saddle texture"
-										fileTypes=".png,.jpg,.jpeg"
-										onChange={(file) => {
-											let dragon = dragons.find(
-												(d) => d.id === selectedDragon.id
-											)!;
-											dragon.saddleTexture = file;
-
-											setDragons(
-												dragons.map((d) =>
-													d.id === selectedDragon.id ? dragon : d
-												)
-											);
-											setSelectedDragon(dragon);
-										}}
-									/>
-									<FileInputWithTextField
-										label="Glow texture"
-										fileTypes=".png,.jpg,.jpeg"
-										onChange={(file) => {
-											let dragon = dragons.find(
-												(d) => d.id === selectedDragon.id
-											)!;
-											dragon.glowTexture = file;
-
-											setDragons(
-												dragons.map((d) =>
-													d.id === selectedDragon.id ? dragon : d
-												)
-											);
-											setSelectedDragon(dragon);
-										}}
-									/>
-								</ValueFieldSection>
-							</SectionAccordion>
-
-							<SectionAccordion title="Fields/Values">
-								<ValueFieldSection
-									// @ts-expect-error Stuff
-									component="form"
-									sx={{
-										gap: 6,
-									}}
-								>
-									{selectedVersion &&
-										fields
-											.filter((s) => s.version === selectedVersion)
-											.flatMap((s) => s.dragonFields)
-											.map((field) => (
-												<DragonFieldComponent
-													key={field.name}
-													field={field}
-													selectedDragon={selectedDragon}
-													dragons={dragons}
-													setDragons={setDragons}
-													setSelectedDragon={setSelectedDragon}
-													items={items}
-													attributes={attributes}
-													damageTypes={damageTypes}
-													lootTables={lootTables}
-													particles={particles}
-													soundEvents={soundEvents}
-												/>
-											))}
-								</ValueFieldSection>
-							</SectionAccordion>
-						</ValueFieldSection>
-					</Container>
+				{selectedArmor && (
+					<ObjectInfoComponent<Armor>
+						type="armor"
+						objects={armors}
+						object={armors.find((a) => a.id === selectedArmor)!}
+						setObjects={(armors) => setArmors(armors)}
+					/>
 				)}
 			</Box>
 		</>
 	);
 };
 
-export const FieldsSection = styled(Box)`
-	${IndentedBox};
+const SettingsMenuStyle = styled.div`
 	display: flex;
 	flex-direction: column;
-	padding: 20px;
-	overflow-y: scroll;
+	background: #343741;
+	margin: auto;
+	border-radius: 15px;
 `;
 
-const ValueFieldSection = styled(FieldsSection)`
-	padding-bottom: 40px;
+const SettingsBackdrop = styled.div`
+	position: absolute;
+	display: flex;
+	flex: 1 0 auto;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 100;
+	overflow: hidden;
+	backdrop-filter: blur(5px) brightness(50%);
+`;
+
+const SettingsAcceptButton = styled(Button)`
+	position: relative;
+	bottom: 0;
+	right: 0;
+	width: auto;
+	height: auto;
+	line-height: 2;
+	background: seagreen;
+	border-radius: 0;
+
+	&:disabled {
+		background: darkslategray;
+		cursor: not-allowed;
+	}
+`;
+
+const SettingsClearButton = styled(Button)`
+	position: relative;
+	bottom: 0;
+	left: 0;
+	width: auto;
+	height: auto;
+	line-height: 2;
+	background: indianred;
+	border-radius: 0;
 `;
 
 export default DMRPage;

@@ -32,7 +32,7 @@ function generateMod(
 
 		if (newBytes.length > oldBytes.length) {
 			throw new Error(
-				"New string must be shorter or equal to the old string length."
+				"There was an error patching the .class file. The new string is longer than the old string."
 			);
 		}
 
@@ -53,7 +53,9 @@ function generateMod(
 		}
 
 		if (!found) {
-			throw new Error("Old string not found in the .class file.");
+			throw new Error(
+				"There was an error patching the .class file. The old string was not found."
+			);
 		}
 
 		const paddedValue =
@@ -72,7 +74,7 @@ function generateMod(
 				`generated/1.21.1/mod/classes/DMRDatapack.class`
 			);
 			if (!response.ok) {
-				throw new Error(`Failed to fetch .class from public folder.`);
+				throw new Error(`There was an error fetching the .class file.`);
 			}
 			const classBuffer = new Uint8Array(await response.arrayBuffer());
 
@@ -87,7 +89,7 @@ function generateMod(
 				`generated/1.21.1/mod/resources/META-INF/neoforge.mods.toml`
 			);
 			if (!modsToml.ok) {
-				throw new Error(`Failed to fetch mods.toml from public folder.`);
+				throw new Error(`There was an error fetching the mods.toml file.`);
 			}
 
 			const tomlContent = await modsToml.text();
@@ -130,7 +132,7 @@ function generateMod(
 			// Clean up
 			URL.revokeObjectURL(url);
 		} catch (error: any) {
-			console.error("Error modifying and packing .class:", error);
+			console.error(`There was an error: ${error.message}`);
 			alert(error.message);
 		}
 	};
@@ -183,6 +185,33 @@ function generateZips(
 			);
 		}
 
+		resourceZip.file(
+			`assets/dmr/textures/block/${dragonId}_dragon_egg.png`,
+			dragon.eggTexture
+		);
+
+		resourceZip.file(
+			`assets/dmr/models/block/dragon_eggs/${dragonId}_dragon_egg.json`,
+			JSON.stringify(
+				{
+					parent: "minecraft:block/dragon_egg",
+					textures: {
+						particle: `dmr:block/${dragonId}_dragon_egg`,
+						all: `dmr:block/${dragonId}_dragon_egg`,
+					},
+				},
+				null,
+				2
+			)
+		);
+
+		if (dragon.eggTextureMcmeta) {
+			resourceZip.file(
+				`assets/dmr/textures/block/${dragonId}_dragon_egg.png.mcmeta`,
+				dragon.eggTextureMcmeta
+			);
+		}
+
 		lang[`dmr.dragon_breed.${dragonId}`] = `${name} Dragon`;
 		lang[`item.dmr.dragon_spawn_egg.${dragonId}`] = `${name} Dragon Spawn Egg`;
 		lang[`block.dmr.dragon_egg.${dragonId}`] = `${name} Dragon Egg`;
@@ -212,6 +241,7 @@ function generateZips(
 			animation_location: dragon.animation
 				? `dmr:animations/${dragonId}.animation.json`
 				: undefined,
+			abilities: get((d) => d.abilities),
 			loot_tables: getAndDo(
 				(d) => d.loot_tables,
 				(d) =>
@@ -220,6 +250,8 @@ function generateZips(
 					})
 			),
 		};
+
+		console.log(data);
 
 		dataZip.file(
 			`data/${datapackId}/dmr/breeds/${dragonId}.json`,
@@ -240,6 +272,20 @@ function generateZips(
 					pack: {
 						pack_format: 22,
 						description: `Textures for ${datapackName}`,
+					},
+				},
+				null,
+				2
+			)
+		);
+
+		dataZip.file(
+			`pack.mcmeta`,
+			JSON.stringify(
+				{
+					pack: {
+						pack_format: 15,
+						description: `Data for ${datapackName}`,
 					},
 				},
 				null,

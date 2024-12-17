@@ -5,13 +5,24 @@ import { useEffect, useState } from "react";
 
 import { DragonFieldTypes } from "./types/DMRFieldTypes";
 
+export const RouteMaps = [
+	{
+		path: "/",
+		name: "Home",
+	},
+	{
+		path: "/dmr/",
+		name: "DMR - Data packs",
+	},
+];
+
 function App() {
 	const [versions, setVersions] = useState<VersionsProp>({});
 	const [fields, setFields] = useState<FieldsProp>({});
 	const [markedForSave, setMarkedForSave] = useState("");
 
 	useEffect(() => {
-		fetch("versions.json").then((response) => {
+		fetch(`${import.meta.env.BASE_URL}versions.json`).then((response) => {
 			if (!response.ok) {
 				throw new Error(`Failed to fetch data: ${response.statusText}`);
 			}
@@ -21,7 +32,7 @@ function App() {
 			});
 		});
 
-		fetch("fields.json").then((response) => {
+		fetch(`${import.meta.env.BASE_URL}fields.json`).then((response) => {
 			if (!response.ok) {
 				throw new Error(`Failed to fetch data: ${response.statusText}`);
 			}
@@ -35,10 +46,10 @@ function App() {
 	return (
 		<>
 			<BrowserRouter>
-				<Navbar onSave={(arg: string) => setMarkedForSave(arg)} />
+				<Navbar />
 				<Routes>
 					<Route
-						path="/Datapack-generator/"
+						path="/dmr/"
 						element={
 							<DMRPage
 								versions={versions["dmr"]}

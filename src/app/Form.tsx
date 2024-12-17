@@ -6,24 +6,15 @@ import React, {
 	ReactNode,
 	useCallback,
 } from "react";
-import {
-	TextField,
-	Button,
-	Box,
-	TextFieldProps,
-	AccordionProps,
-	Accordion,
-	AccordionSummary,
-	AccordionDetails,
-} from "@mui/material";
-import { InputField, Title } from "./StyledProps.tsx";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { TextFieldProps } from "@mui/material";
+import { InputField } from "./StyledProps.tsx";
 
 // Form Context Interface
 interface FormContextType {
 	registerField: (name: string) => void;
 	unregisterField: (name: string) => void;
 	setFieldValue: (name: string, value: string) => void;
+	getFieldValue: (name: string) => string;
 	validate: () => boolean;
 	errors: Record<string, string>;
 	hasErrorInSection: (fieldNames: string[]) => boolean;
@@ -61,6 +52,10 @@ export const FormProvider: React.FC<{ children: ReactNode }> = ({
 		setErrors((prev) => ({ ...prev, [name]: "" })); // Clear error if valid
 	};
 
+	const getFieldValue = (name: string) => {
+		return fields[name];
+	};
+
 	const validate = () => {
 		const newErrors: Record<string, string> = {};
 		Object.entries(fields).forEach(([name, value]) => {
@@ -82,6 +77,7 @@ export const FormProvider: React.FC<{ children: ReactNode }> = ({
 				registerField,
 				unregisterField,
 				setFieldValue,
+				getFieldValue,
 				validate,
 				errors,
 				hasErrorInSection,
@@ -113,7 +109,13 @@ export const FormInput: React.FC<FormInputProps> = ({
 	required = false,
 	...props
 }) => {
-	const { registerField, unregisterField, setFieldValue, errors } = useForm();
+	const {
+		registerField,
+		unregisterField,
+		setFieldValue,
+		getFieldValue,
+		errors,
+	} = useForm();
 
 	useEffect(() => {
 		if (required) registerField(name); // Register field
@@ -128,11 +130,17 @@ export const FormInput: React.FC<FormInputProps> = ({
 	}, [props.$isDirty, props.value, name, setFieldValue]);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setFieldValue(name, e.target.value); // Update the value in the form context
+		// setFieldValue(name, e.target.value); // Update the value in the form context
 		if (props.onChange) {
 			props.onChange(e); // Call any external onChange handler
 		}
 	};
+
+	useEffect(() => {
+		if (props.value && !getFieldValue(name)) {
+			setFieldValue(name, props.value as string);
+		}
+	}, []);
 
 	return (
 		<InputField
@@ -148,70 +156,5 @@ export const FormInput: React.FC<FormInputProps> = ({
 					: {}
 			}
 		/>
-	);
-};
-
-interface SectionAccordionProps extends AccordionProps {
-	title: string;
-	defaultExpanded?: boolean;
-}
-
-export const SectionAccordion: React.FC<SectionAccordionProps> = ({
-	title,
-	children,
-	defaultExpanded = false,
-	...accordionProps
-}) => {
-	const { hasErrorInSection } = useForm();
-	const [expanded, setExpanded] = useState<boolean>(defaultExpanded);
-	const [fieldNames, setFieldNames] = useState<string[]>([]);
-
-	// Extract field names from children
-	useEffect(() => {
-		const collectedFieldNames: string[] = [];
-		React.Children.forEach(children, (child) => {
-			if (
-				React.isValidElement(child) &&
-				child.props.name &&
-				typeof child.props.name === "string"
-			) {
-				collectedFieldNames.push(child.props.name);
-			}
-		});
-		setFieldNames(collectedFieldNames);
-	}, [children]);
-
-	// Automatically expand if there are errors in the section
-	useEffect(() => {
-		if (hasErrorInSection(fieldNames)) {
-			setExpanded(true);
-		}
-	}, [fieldNames, hasErrorInSection]);
-
-	const handleAccordionChange = (
-		event: React.SyntheticEvent,
-		isExpanded: boolean
-	) => {
-		setExpanded(isExpanded || hasErrorInSection(fieldNames));
-	};
-
-	return (
-		<Accordion
-			{...accordionProps}
-			expanded={expanded}
-			onChange={handleAccordionChange}
-			sx={{
-				borderRadius: "15px",
-				":before": { backgroundColor: "transparent" },
-				"& .MuiInputBase-root": { borderRadius: "15px" },
-			}}
-		>
-			<AccordionSummary
-				expandIcon={<ExpandMoreIcon style={{ color: "white" }} />}
-			>
-				<Title style={{ marginBottom: "0" }}>{title}</Title>
-			</AccordionSummary>
-			<AccordionDetails>{children}</AccordionDetails>
-		</Accordion>
 	);
 };

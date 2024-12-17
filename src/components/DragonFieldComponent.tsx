@@ -52,8 +52,6 @@ export const DragonFieldComponent = ({
 		if (!selectedDragon) return;
 		let dragon = dragons.find((d) => d.id === selectedDragon.id)!;
 
-		console.log("Setting field value", field.name, value, typeof value);
-
 		dragon.fields = {
 			...dragon.fields,
 			[field.name]: value,
@@ -72,6 +70,60 @@ export const DragonFieldComponent = ({
 			</Tooltip>
 		);
 	};
+
+	if (field.type === "abilities") {
+		return (
+			<Autocomplete
+				freeSolo
+				options={field.options ?? []}
+				getOptionLabel={(option: any) => option.type ?? option}
+				autoHighlight
+				disableClearable
+				filterSelectedOptions
+				multiple={true}
+				limitTags={3}
+				onChange={(_event: any, value: any) => {
+					setFieldValue(
+						value.map((ability: any) => {
+							return { type: ability };
+						})
+					);
+					setDisplayValue(value);
+				}}
+				renderInput={(params) => (
+					<FormInput
+						autoComplete="off"
+						{...params}
+						label={field.name}
+						name={field.name}
+						onChange={(event: any) => {
+							const value = event.target.value.trim();
+							setFieldValue(
+								value
+									.split(",")
+									.filter((s: any) => s.trim())
+									.map((ability: any) => {
+										return { type: ability };
+									})
+							);
+							setDisplayValue(value);
+						}}
+						InputProps={{
+							...params.InputProps,
+							endAdornment: (
+								<>
+									{params.InputProps.endAdornment}
+									<InputAdornment position="end">
+										<HelpButton />
+									</InputAdornment>
+								</>
+							),
+						}}
+					/>
+				)}
+			/>
+		);
+	}
 
 	if (field.type === "color") {
 		const hexToInt = (hex?: string) => {
@@ -171,52 +223,6 @@ export const DragonFieldComponent = ({
 					setFieldValue(value);
 					setDisplayValue(value);
 				}}
-			/>
-		);
-	}
-
-	if (field.type === "abilities") {
-		return (
-			<Autocomplete
-				freeSolo
-				options={field.options ?? []}
-				getOptionLabel={(option: any) => option.type ?? option}
-				autoHighlight
-				disableClearable
-				filterSelectedOptions
-				multiple={field.multiple && field.options}
-				limitTags={3}
-				renderInput={(params) => (
-					<FormInput
-						autoComplete="off"
-						{...params}
-						label={field.name}
-						name={field.name}
-						onChange={(event: any) => {
-							const value = event.target.value.trim();
-							setFieldValue(
-								value
-									.split(",")
-									.filter((s: any) => s.trim())
-									.map((ability: any) => {
-										return { type: ability };
-									})
-							);
-							setDisplayValue(value);
-						}}
-						InputProps={{
-							...params.InputProps,
-							endAdornment: (
-								<>
-									{params.InputProps.endAdornment}
-									<InputAdornment position="end">
-										<HelpButton />
-									</InputAdornment>
-								</>
-							),
-						}}
-					/>
-				)}
 			/>
 		);
 	}

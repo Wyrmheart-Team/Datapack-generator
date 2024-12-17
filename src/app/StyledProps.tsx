@@ -3,17 +3,19 @@ import {
 	Autocomplete,
 	Box,
 	Chip,
+	IconButton,
 	InputAdornment,
 	Select,
 	TextField,
 	TextFieldProps,
+	Tooltip,
 } from "@mui/material";
 import { MuiColorInput } from "mui-color-input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { default as MuiButton } from "@mui/material/Button";
 import { FormInput } from "./Form.tsx";
-import { v4 as uuidv4 } from "uuid";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 
 // Dark indented box
 export const IndentedBox = `
@@ -55,8 +57,10 @@ const InputFieldStyled = styled(TextField)`
 	height: 2rem;
 	border: 1px solid #282c34;
 	border-radius: 0.5rem;
-	padding: 10px;
+	padding-bottom: 20px !important;
+	padding-top: 20px !important;
 	font-size: 16px;
+
 	& .MuiInputBase-root {
 		${RaisedBox};
 	}
@@ -66,7 +70,7 @@ const InputFieldStyled = styled(TextField)`
 	}
 
 	& .MuiInputLabel-root[data-shrink="true"] {
-		padding-top: 5px;
+		padding-top: 30px !important;
 	}
 
 	& .MuiInputLabel-root {
@@ -101,7 +105,7 @@ export const ColorField = styled(MuiColorInput)`
 	}
 
 	& .MuiInputLabel-root[data-shrink="true"] {
-		padding-top: 5px;
+		padding-top: 25px;
 	}
 
 	& .MuiInputLabel-root {
@@ -109,6 +113,28 @@ export const ColorField = styled(MuiColorInput)`
 		font-style: italic;
 	}
 `;
+
+export const SaveSection = styled.div`
+	display: flex;
+	flex-direction: row;
+	gap: 6px;
+	right: 10px;
+	position: absolute;
+	z-index: 10;
+	transform: translateY(-120%);
+`;
+
+export const SaveButton = styled(IconButton)`
+	background-color: #007bff !important;
+	color: white !important;
+	border: none;
+	border-radius: 15px !important;
+	padding: 0.5rem;
+	font-size: 16px;
+	cursor: pointer;
+	width: 200px;
+`;
+
 export const Container = styled(Box)`
 	display: flex;
 	flex-direction: column;
@@ -129,21 +155,42 @@ export const InputField: React.FC<InputFieldProps> = ({
 	return <InputFieldStyled {...textFieldProps} name={name} />;
 };
 
-export function FileInputWithTextField({
+export const StyledFormInput = styled(FormInput)`
+	& .MuiInputBase-root {
+		margin: 40px !important;
+		//padding: 20px !important;
+	}
+
+	& .MuiTextField-root {
+		margin: 40px !important;
+		padding-top: 20px !important;
+	}
+
+	& .MuiInputLabel-root {
+		margin: 40px !important;
+		padding-top: 20px !important;
+	}
+`;
+
+export function ImageInputField({
 	label,
+	tooltip,
 	required,
 	onChange,
 	fileTypes,
+	value,
 }: {
 	label: string;
+	tooltip?: string;
 	required?: boolean;
 	onChange: (arg: File) => void;
 	fileTypes?: string;
+	value: File | undefined;
 }) {
 	const [fileName, setFileName] = useState("");
 	const [isDirty, setIsDirty] = useState(false);
 
-	const id = `file-upload-${uuidv4()}`;
+	const id = `file-upload-${crypto.randomUUID()}`;
 
 	const handleFileChange = (event: any) => {
 		const file = event.target.files[0];
@@ -162,6 +209,14 @@ export function FileInputWithTextField({
 		document.getElementById(id)!.click();
 	};
 
+	useEffect(() => {
+		if (value) {
+			setFileName(value.name);
+			onChange(value);
+			setIsDirty(true);
+		}
+	}, []);
+
 	return (
 		<>
 			<input
@@ -172,7 +227,7 @@ export function FileInputWithTextField({
 				onChange={handleFileChange}
 			/>
 
-			<FormInput
+			<StyledFormInput
 				$isDirty={isDirty}
 				$setIsDirty={setIsDirty}
 				value={fileName}
@@ -186,6 +241,7 @@ export function FileInputWithTextField({
 					endAdornment: (
 						<InputAdornment position="end" style={{ pointerEvents: "auto" }}>
 							<MuiButton
+								style={{ zIndex: 10 }}
 								variant="contained"
 								type="button"
 								startIcon={<CloudUploadIcon />}
@@ -193,6 +249,13 @@ export function FileInputWithTextField({
 							>
 								Upload file
 							</MuiButton>
+							{tooltip && (
+								<Tooltip title={tooltip} arrow>
+									<IconButton style={{ zIndex: 5 }}>
+										<HelpOutlineIcon style={{ color: "white" }} />
+									</IconButton>
+								</Tooltip>
+							)}
 						</InputAdornment>
 					),
 				}}
@@ -200,6 +263,8 @@ export function FileInputWithTextField({
 		</>
 	);
 }
+
+const ImageInputFieldStyled = styled(StyledFormInput)``;
 
 interface KeyValuePair {
 	key: string;
@@ -254,7 +319,6 @@ export const KeyValuePairInput: React.FC<{
 				value={pairs.map((pair) => `${pair.key}=${pair.value}`)}
 				limitTags={3}
 				onChange={(event, newValues, reason) => {
-					console.log(newValues, reason);
 					if (reason === "selectOption") {
 						// Appending "=" only when an option is explicitly selected
 						const selectedOption = newValues[newValues.length - 1];
